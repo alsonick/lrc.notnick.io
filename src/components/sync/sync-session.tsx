@@ -384,7 +384,10 @@ export function SyncSession({
           </ol>
         </div>
 
-        <footer className="flex flex-wrap items-center gap-2 border-t border-white/10 bg-neutral-950/85 px-3 py-3">
+        <div
+          aria-label="Playback controls"
+          className="flex flex-wrap items-center gap-2 border-t border-white/10 bg-neutral-950/85 px-3 py-3"
+        >
           <ToolbarButton
             onClick={() => {
               pause();
@@ -508,7 +511,7 @@ export function SyncSession({
               Save .lrc
             </ToolbarButton>
           </div>
-        </footer>
+        </div>
       </section>
 
       <p className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground">

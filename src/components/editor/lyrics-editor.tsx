@@ -232,14 +232,12 @@ export function LyricsEditor() {
           spellCheck={false}
           disabled={!hydrated}
           aria-label="Lyrics"
-          className="min-h-[24rem] rounded-none border-0 px-5 py-4 text-base leading-relaxed shadow-none focus-visible:ring-0 md:text-base"
+          // Same height as the synchronizer panel: half the viewport below
+          // the header (at least 24rem), minus that page's padding and hint.
+          className="h-[calc(max((100dvh-3.5rem)/2,24rem)-3.75rem)] field-sizing-fixed sm:h-[calc(max((100dvh-3.5rem)/2,24rem)-4.75rem)] resize-none overflow-y-auto rounded-none border-0 px-5 py-4 text-base leading-relaxed shadow-none focus-visible:ring-0 md:text-base"
         />
 
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t bg-muted/40 p-3">
-          <p className="text-xs text-muted-foreground">
-            Time tags like <code>[00:12.34]</code> are kept when you come back
-            from the synchronizer, so you can resume where you left off.
-          </p>
+        <div className="flex flex-wrap items-center justify-end gap-3 border-t bg-muted/40 p-3">
           <div className="flex flex-wrap items-center gap-2">
             <Button variant="outline" disabled={empty} onClick={copy}>
               <Copy />
