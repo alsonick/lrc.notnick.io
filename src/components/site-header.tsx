@@ -19,7 +19,6 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -169,19 +168,11 @@ function HelpDialog() {
         </DialogClose>
         <div className="border-b bg-muted/40 px-6 pt-5 pr-12 pb-4">
           <DialogHeader>
-            <div className="flex items-start gap-3">
+            <div className="flex items-center gap-3">
               <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
                 <AudioLines className="size-5" />
               </span>
-              <div className="space-y-1">
-                <DialogTitle className="text-lg">
-                  How to make an LRC file
-                </DialogTitle>
-                <DialogDescription>
-                  An .lrc file is plain text where each line starts with the
-                  moment it should appear.
-                </DialogDescription>
-              </div>
+              <DialogTitle className="text-lg">How to make an LRC file</DialogTitle>
             </div>
           </DialogHeader>
         </div>
