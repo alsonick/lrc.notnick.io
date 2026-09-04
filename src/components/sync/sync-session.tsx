@@ -58,7 +58,7 @@ const COUNTDOWN_OPTIONS = [0, 3, 5, 10].map((s) => ({
 }));
 
 const SELECT_TRIGGER_CLASS =
-  "min-h-10 w-[4.75rem] rounded-r-none border-neutral-300 bg-white text-neutral-900 hover:bg-neutral-100";
+  "min-h-10 w-[4.25rem] rounded-r-none border-neutral-300 bg-white text-neutral-900 hover:bg-neutral-100";
 
 type Props = {
   lines: LyricLine[];
@@ -408,7 +408,7 @@ export function SyncSession({
 
           <Tooltip>
             <TooltipTrigger
-              render={<ToolbarButton onClick={onPickAudio} className="max-w-48" />}
+              render={<ToolbarButton onClick={onPickAudio} className="max-w-36" />}
             >
               <FileAudio />
               <span className="truncate">{audio ? audio.name : "Audio"}</span>
@@ -447,7 +447,7 @@ export function SyncSession({
               onClick={togglePlayback}
               disabled={audio !== null && !clock.ready}
               aria-label={startLabel}
-              className="min-w-32 rounded-l-none border-l-0"
+              className="min-w-28 rounded-l-none border-l-0"
             >
               {startContent}
             </ToolbarButton>
@@ -479,7 +479,7 @@ export function SyncSession({
             <ToolbarButton
               onClick={nextLine}
               disabled={!isPlaying || done}
-              className="min-w-32 rounded-l-none border-l-0"
+              className="min-w-28 rounded-l-none border-l-0"
             >
               {done ? (
                 <>
@@ -496,19 +496,21 @@ export function SyncSession({
           </div>
 
           <div className="ml-auto flex items-center gap-3">
-            <span className="hidden text-xs text-neutral-400 tabular-nums md:inline">
+            <span className="hidden text-xs text-neutral-400 tabular-nums lg:inline">
               {status}
             </span>
             <ToolbarButton
               onClick={save}
               disabled={!hasProgress}
+              aria-label="Save .lrc"
+              title="Save .lrc"
               className={cn(
                 done &&
                   "border-primary/60 bg-primary/20 text-primary hover:border-primary hover:bg-primary/30 hover:text-primary",
               )}
             >
               <Download />
-              Save .lrc
+              <span className="hidden lg:inline">Save .lrc</span>
             </ToolbarButton>
           </div>
         </div>
