@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LRC Generator
 
-## Getting Started
+Make synchronized `.lrc` lyric files in the browser. Paste lyrics, play your
+song, and stamp each line as it is sung.
 
-First, run the development server:
+Built with Next.js (App Router), React 19, Tailwind CSS 4 and shadcn/ui.
+
+## Workflow
+
+1. **Editor** (`/`): paste lyrics from anywhere. Use *Strip sections* to drop
+   `[Verse 1]` / `[Chorus]` headers, *Strip tags* to remove existing time
+   tags, and *lowercase* / *UPPERCASE* to change case. Every edit is saved to
+   localStorage.
+2. **Synchronize** (`/sync`): load an audio file with *Audio* (or use the
+   built-in stopwatch and play the song elsewhere), press *START*, then press
+   *Next Line* (or `Enter` / `Space`) each time a line begins. The START button
+   turns into the running clock; click it to pause and it becomes *Continue*.
+3. While paused, a dot appears before every stamped line. Click a dot to undo
+   that line and everything after it; playback rewinds two seconds before it.
+   `Backspace` undoes the last line.
+4. Stamping the last line downloads the `.lrc` automatically, named after the
+   audio file. *Save .lrc* downloads it again at any time.
+
+The select next to *Next Line* is an anticipation offset subtracted from each
+stamp; the select next to *START* is a countdown before playback begins.
+
+## Development
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Then open http://localhost:3000. `pnpm build` produces a static production
+build and `pnpm lint` runs ESLint.
