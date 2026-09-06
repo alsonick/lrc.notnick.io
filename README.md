@@ -24,6 +24,9 @@ Built with Next.js (App Router), React 19, Tailwind CSS 4 and shadcn/ui.
 The select next to *Next Line* is an anticipation offset subtracted from each
 stamp; the select next to *START* is a countdown before playback begins.
 
+The sun / moon button in the header switches between light, dark and system
+themes. System (the default) follows the OS setting; the choice is remembered.
+
 ## Development
 
 ```bash

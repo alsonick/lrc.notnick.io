@@ -14,7 +14,7 @@ export function SyncPage() {
   if (!hydrated) {
     return (
       <div className="mx-auto w-full max-w-5xl px-4 py-6">
-        <div className="h-[70vh] animate-pulse rounded-xl bg-neutral-300" />
+        <div className="h-[70vh] animate-pulse rounded-xl bg-neutral-300 dark:bg-neutral-800" />
       </div>
     );
   }

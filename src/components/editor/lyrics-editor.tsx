@@ -234,7 +234,7 @@ export function LyricsEditor() {
           aria-label="Lyrics"
           // Same height as the synchronizer panel: half the viewport below
           // the header (at least 24rem), minus that page's padding and hint.
-          className="h-[calc(max((100dvh-3.5rem)/2,24rem)-3.75rem)] field-sizing-fixed sm:h-[calc(max((100dvh-3.5rem)/2,24rem)-4.75rem)] resize-none overflow-y-auto rounded-none border-0 px-5 py-4 text-base leading-relaxed shadow-none focus-visible:ring-0 md:text-base"
+          className="h-[calc(max((100dvh-3.5rem)/2,24rem)-3.75rem)] field-sizing-fixed sm:h-[calc(max((100dvh-3.5rem)/2,24rem)-4.75rem)] resize-none overflow-y-auto rounded-none border-0 px-5 py-4 text-base leading-relaxed shadow-none focus-visible:ring-0 disabled:bg-transparent md:text-base dark:bg-transparent dark:disabled:bg-transparent"
         />
 
         <div className="flex flex-wrap items-center justify-end gap-3 border-t bg-muted/40 p-3">
