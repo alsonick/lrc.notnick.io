@@ -4,9 +4,9 @@ import { social } from "@/lib/social-links";
 
 export function Footer() {
   return (
-    <footer className="mx-auto mt-5 flex w-full max-w-5xl items-center justify-between border-t border-neutral-200 px-4 pt-10 pb-2">
-      <div className="flex flex-col gap-0.5 text-xs text-neutral-500">
-        <h2 className="text-base font-bold text-neutral-600 sm:text-lg">
+    <footer className="mx-auto mt-5 flex w-full max-w-5xl items-center justify-between border-t border-border px-4 pt-10 pb-2">
+      <div className="flex flex-col gap-0.5 text-xs text-muted-foreground">
+        <h2 className="text-base font-bold text-neutral-600 sm:text-lg dark:text-neutral-300">
           {FULL_NAME}
         </h2>
         <p>&copy; {new Date().getFullYear()} | All rights reserved.</p>

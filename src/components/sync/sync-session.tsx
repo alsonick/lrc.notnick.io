@@ -58,7 +58,7 @@ const COUNTDOWN_OPTIONS = [0, 3, 5, 10].map((s) => ({
 }));
 
 const SELECT_TRIGGER_CLASS =
-  "min-h-10 w-[4.25rem] rounded-r-none border-neutral-300 bg-white text-neutral-900 hover:bg-neutral-100";
+  "min-h-10 w-[4.25rem] rounded-r-none border-neutral-300 bg-white text-neutral-900 hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700";
 
 type Props = {
   lines: LyricLine[];
@@ -353,7 +353,7 @@ export function SyncSession({
 
       <section
         aria-label="Synchronizer"
-        className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-gradient-to-b from-neutral-500 via-neutral-600 to-neutral-800 shadow-lg ring-1 ring-black/20"
+        className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-gradient-to-b from-neutral-500 via-neutral-600 to-neutral-800 shadow-lg ring-1 ring-black/20 dark:from-neutral-800 dark:via-neutral-900 dark:to-neutral-950 dark:ring-white/10"
       >
         <div
           ref={listRef}
@@ -506,7 +506,7 @@ export function SyncSession({
               title="Save .lrc"
               className={cn(
                 done &&
-                  "border-primary/60 bg-primary/20 text-primary hover:border-primary hover:bg-primary/30 hover:text-primary",
+                  "border-primary/60 bg-primary/20 text-primary hover:border-primary hover:bg-primary/30 hover:text-primary dark:border-primary/60 dark:bg-primary/20 dark:hover:border-primary dark:hover:bg-primary/30",
               )}
             >
               <Download />

@@ -3,6 +3,7 @@ import { Geist_Mono, Inter } from "next/font/google";
 
 import { Footer } from "@/components/footer";
 import { SiteHeader } from "@/components/site-header";
+import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import {
@@ -141,19 +142,22 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col bg-neutral-100 text-foreground">
+      <body className="flex min-h-full flex-col bg-canvas text-foreground">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
-        <TooltipProvider>
-          <SiteHeader />
-          <main className="flex flex-1 flex-col">{children}</main>
-          <Footer />
-        </TooltipProvider>
-        <Toaster position="bottom-center" richColors />
+        <ThemeProvider>
+          <TooltipProvider>
+            <SiteHeader />
+            <main className="flex flex-1 flex-col">{children}</main>
+            <Footer />
+          </TooltipProvider>
+          <Toaster position="bottom-center" richColors />
+        </ThemeProvider>
       </body>
     </html>
   );
