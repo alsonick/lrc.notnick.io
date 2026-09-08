@@ -123,8 +123,9 @@ const STEPS: Step[] = [
     title: "Save the file",
     body: (
       <>
-        Stamping the last line downloads the .lrc automatically. Keep it next
-        to your audio with the same file name so players pick it up.
+        Stamp the last line, then hit <strong>Done</strong> to download the
+        .lrc. Keep it next to your audio with the same name so players pick it
+        up.
       </>
     ),
   },
