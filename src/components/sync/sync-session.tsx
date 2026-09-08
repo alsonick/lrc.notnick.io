@@ -57,6 +57,10 @@ const COUNTDOWN_OPTIONS = [0, 3, 5, 10].map((s) => ({
   label: `${s}s`,
 }));
 
+/** Green highlight for the button that finishes the job once every line is stamped. */
+const READY_CLASS =
+  "border-primary/60 bg-primary/20 text-primary hover:border-primary hover:bg-primary/30 hover:text-primary dark:border-primary/60 dark:bg-primary/20 dark:hover:border-primary dark:hover:bg-primary/30";
+
 const SELECT_TRIGGER_CLASS =
   "min-h-10 w-[4.25rem] rounded-r-none border-neutral-300 bg-white text-neutral-900 hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700";
 
@@ -147,31 +151,40 @@ export function SyncSession({
     [audio?.name],
   );
 
+  /** Stops the clock and hands over the file. */
+  const finish = useCallback(() => {
+    pause();
+    const filename = saveLines(lines);
+    toast.success(`All lines synchronized. Downloaded ${filename}.`);
+  }, [lines, pause, saveLines]);
+
+  /**
+   * Stamps the current line. Once every line is stamped the same button reads
+   * "Done", and that extra press is what downloads the file, so a mistimed
+   * last line can still be undone before anything is saved.
+   */
   const nextLine = useCallback(() => {
-    if (!isPlaying || done) return;
+    if (done) {
+      finish();
+      return;
+    }
+    if (!isPlaying) return;
     const stamp = Math.max(0, now() - anticipation);
     const target = syncable[cursor];
-    const next = lines.map((line, index) =>
-      index === target ? { ...line, time: stamp } : line,
+    onLinesChange(
+      lines.map((line, index) =>
+        index === target ? { ...line, time: stamp } : line,
+      ),
     );
-    onLinesChange(next);
-    // Stamping the last line finishes the job: stop the clock and hand over
-    // the file right away.
-    if (next.every((line) => line.text === "" || line.time !== null)) {
-      pause();
-      const filename = saveLines(next);
-      toast.success(`All lines synchronized. Downloaded ${filename}.`);
-    }
   }, [
     anticipation,
     cursor,
     done,
+    finish,
     isPlaying,
     lines,
     now,
     onLinesChange,
-    pause,
-    saveLines,
     syncable,
   ]);
 
@@ -498,8 +511,12 @@ export function SyncSession({
             </Select>
             <ToolbarButton
               onClick={nextLine}
-              disabled={!isPlaying || done}
-              className="min-w-28 rounded-l-none border-l-0"
+              disabled={!done && !isPlaying}
+              title={done ? "Download the .lrc" : undefined}
+              className={cn(
+                "min-w-28 rounded-l-none border-l-0",
+                done && READY_CLASS,
+              )}
             >
               {done ? (
                 <>
@@ -524,10 +541,7 @@ export function SyncSession({
               disabled={!hasProgress}
               aria-label="Save .lrc"
               title="Save .lrc"
-              className={cn(
-                done &&
-                  "border-primary/60 bg-primary/20 text-primary hover:border-primary hover:bg-primary/30 hover:text-primary dark:border-primary/60 dark:bg-primary/20 dark:hover:border-primary dark:hover:bg-primary/30",
-              )}
+              className={cn(done && READY_CLASS)}
             >
               <Download />
               <span className="hidden lg:inline">Save .lrc</span>

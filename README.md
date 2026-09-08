@@ -37,8 +37,9 @@ Below the text: **Copy**, **Download .lrc** (once something is synced) and
   line.
 - While paused, click a line's text to edit it. Click anywhere else, or
   Continue, to keep the change; `Esc` cancels. Timestamps are kept.
-- Stamping the last line stops playback and downloads the `.lrc`, named after
-  the audio file. **Save .lrc** downloads it again any time.
+- Once every line is stamped, Next Line reads **Done**. Click it to stop and
+  download the `.lrc`, named after the audio file. **Save .lrc** downloads it
+  again any time.
 - **Editor** goes back to the editor with every stamp intact.
 
 Keep the `.lrc` next to the audio with the same file name and most players
