@@ -9,11 +9,13 @@ import {
   ClipboardPaste,
   Download,
   FileAudio,
+  PencilLine,
   Play,
   Undo2,
   X,
 } from "lucide-react";
 
+import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,11 +27,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Kbd } from "@/components/ui/kbd";
+import { SITE_NAME } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { href: "/", label: "Editor" },
-  { href: "/sync", label: "Synchronize" },
+  { href: "/", label: "Editor", icon: PencilLine },
+  { href: "/sync", label: "Synchronize", icon: AudioLines },
 ] as const;
 
 export function SiteHeader() {
@@ -40,9 +43,10 @@ export function SiteHeader() {
       <div className="mx-auto flex h-14 w-full max-w-5xl items-center gap-3 px-4 sm:gap-4">
         <Link
           href="/"
-          className="text-base font-semibold tracking-tight whitespace-nowrap"
+          aria-label={`${SITE_NAME} home`}
+          className="flex shrink-0 items-center"
         >
-          <span className="text-primary">LRC</span> Generator
+          <Logo className="size-7" />
         </Link>
         <nav className="ml-auto flex items-center gap-0.5 sm:gap-1">
           {NAV.map((item) => {
@@ -52,10 +56,11 @@ export function SiteHeader() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "rounded-md px-2 py-1.5 text-sm text-neutral-300 transition-colors hover:bg-white/10 hover:text-white sm:px-3",
+                  "inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-neutral-300 transition-colors hover:bg-white/10 hover:text-white sm:px-3 [&_svg]:size-4 [&_svg]:shrink-0",
                   active && "bg-primary/15 text-primary hover:text-primary",
                 )}
               >
+                <item.icon aria-hidden />
                 {item.label}
               </Link>
             );
@@ -78,12 +83,7 @@ const STEPS: Step[] = [
   {
     icon: ClipboardPaste,
     title: "Paste your lyrics",
-    body: (
-      <>
-        Copy them from Genius or anywhere else. <strong>Strip sections</strong>{" "}
-        removes headers like <code>[Verse 1]</code> and <code>[Chorus]</code>.
-      </>
-    ),
+    body: "Copy them from Genius or anywhere else.",
   },
   {
     icon: FileAudio,
@@ -101,10 +101,9 @@ const STEPS: Step[] = [
     title: "Stamp each line",
     body: (
       <>
-        Press <strong>START</strong>, then hit <strong>Next Line</strong> the
-        moment each line is sung. The button becomes the running clock; click
-        it to pause. The dropdown beside Next Line shifts every stamp a little
-        earlier, and the one beside START gives you a countdown.
+        Press <strong>START</strong>, then hit <strong>Next Line</strong> as
+        each line is sung. The dropdowns add a countdown or shift stamps
+        earlier.
       </>
     ),
   },

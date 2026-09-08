@@ -131,11 +131,10 @@ export function LyricsEditor() {
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">
-            Free online LRC generator
+            Free Online LRC Generator
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Paste your lyrics, play the song and tap each line as it&apos;s
-            sung. Download a synced .lrc file that works in any media player.
+            A browser-based LRC generator for synced lyrics.
           </p>
         </div>
         <p className="text-sm text-muted-foreground tabular-nums">
@@ -252,10 +251,8 @@ export function LyricsEditor() {
               Download .lrc
             </Button>
             <Button
-              size="lg"
               disabled={stats.lines === 0}
               onClick={() => router.push("/sync")}
-              className="px-4"
             >
               <AudioLines />
               Synchronize
