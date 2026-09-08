@@ -92,6 +92,8 @@ export function SyncSession({
   );
   const [countdown, setCountdown] = useState<number | null>(null);
   const [resetOpen, setResetOpen] = useState(false);
+  /** Index of the line whose text is being edited inline, if any. */
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
   /** Indices of lines that actually get a timestamp (blank lines are skipped). */
@@ -193,6 +195,19 @@ export function SyncSession({
   const undoLast = useCallback(() => {
     if (currentLine !== null) undoFrom(currentLine);
   }, [currentLine, undoFrom]);
+
+  /** Applies an inline edit. Blank text is treated as "leave it alone". */
+  const commitEdit = useCallback(
+    (index: number, raw: string) => {
+      setEditingIndex(null);
+      const text = raw.replace(/\s*[\r\n]+\s*/g, " ").trim();
+      if (text === "" || text === lines[index]?.text) return;
+      onLinesChange(
+        lines.map((line, i) => (i === index ? { ...line, text } : line)),
+      );
+    },
+    [lines, onLinesChange],
+  );
 
   const togglePlayback = useCallback(() => {
     if (countdown !== null) {
@@ -377,8 +392,13 @@ export function SyncSession({
                 time={line.time}
                 state={stateFor(index)}
                 showDot={showDots}
+                editable={showDots}
+                editing={editingIndex === index}
                 rewindSeconds={clock.usingAudio ? REWIND_SECONDS : 0}
                 onUndo={() => undoFrom(index)}
+                onEdit={() => setEditingIndex(index)}
+                onCommit={(text) => commitEdit(index, text)}
+                onCancel={() => setEditingIndex(null)}
               />
             ))}
           </ol>
@@ -526,7 +546,6 @@ export function SyncSession({
         <span>
           <Kbd>P</Kbd> play / pause
         </span>
-        <span>Pause, then click a line&apos;s dot to redo from there.</span>
       </p>
 
       <ConfirmDialog

@@ -1,38 +1,79 @@
 # LRC Generator
 
-Make synchronized `.lrc` lyric files in the browser. Paste lyrics, play your
-song, and stamp each line as it is sung.
+Make timed `.lrc` lyric files in the browser: paste the lyrics, play the song,
+tap a key as each line starts, download the file.
+Live at [lrc.notnick.io](https://lrc.notnick.io).
 
-Built with Next.js (App Router), React 19, Tailwind CSS 4 and shadcn/ui.
+Everything runs client-side. Lyrics are saved to localStorage; the audio file
+stays in memory and is never uploaded.
 
-## Workflow
+## Editor
 
-1. **Editor** (`/`): paste lyrics from anywhere. Use *Strip sections* to drop
-   `[Verse 1]` / `[Chorus]` headers, *Strip tags* to remove existing time
-   tags, and *lowercase* / *UPPERCASE* to change case. Every edit is saved to
-   localStorage.
-2. **Synchronize** (`/sync`): load an audio file with *Audio* (or use the
-   built-in stopwatch and play the song elsewhere), press *START*, then press
-   *Next Line* (or `Enter` / `Space`) each time a line begins. The START button
-   turns into the running clock; click it to pause and it becomes *Continue*.
-3. While paused, a dot appears before every stamped line. Click a dot to undo
-   that line and everything after it; playback rewinds two seconds before it.
-   `Backspace` undoes the last line.
-4. Stamping the last line downloads the `.lrc` automatically, named after the
-   audio file. *Save .lrc* downloads it again at any time.
+Paste lyrics from Genius or anywhere else, then tidy them with the toolbar:
 
-The select next to *Next Line* is an anticipation offset subtracted from each
-stamp; the select next to *START* is a countdown before playback begins.
+- **Strip sections** removes `[Verse 1]`, `[Chorus]` and other headers, plus
+  the leftovers Genius adds when copying.
+- **Strip tags** removes existing `[mm:ss.xx]` time tags and metadata lines.
+- **lowercase** / **UPPERCASE** change the case. **Original** restores the
+  pasted casing.
+- **Reset** clears the editor.
 
-The sun / moon button in the header switches between light, dark and system
-themes. System (the default) follows the OS setting; the choice is remembered.
+Each of these shows a toast with an Undo button.
 
-## Development
+Below the text: **Copy**, **Download .lrc** (once something is synced) and
+**Synchronize**. Pasting an existing `.lrc` works; its timestamps are kept.
+
+## Synchronize
+
+- **Audio** loads a file. Without one, START runs a stopwatch so you can sync
+  to music playing elsewhere.
+- **START** begins playback, after the countdown picked in the dropdown beside
+  it. The button becomes the running clock; click it to pause and it reads
+  **Continue**.
+- **Next Line** stamps the current line. The dropdown beside it shifts every
+  stamp earlier by that amount, for anyone who tends to press late.
+- While paused, click the dot in front of a stamped line to clear it and every
+  line after it. With a file loaded, playback rewinds two seconds before that
+  line.
+- While paused, click a line's text to edit it. Click anywhere else, or
+  Continue, to keep the change; `Esc` cancels. Timestamps are kept.
+- Stamping the last line stops playback and downloads the `.lrc`, named after
+  the audio file. **Save .lrc** downloads it again any time.
+- **Editor** goes back to the editor with every stamp intact.
+
+Keep the `.lrc` next to the audio with the same file name and most players
+pick it up.
+
+### Keyboard
+
+| Key | Action |
+| --- | --- |
+| `Enter`, `Space`, `↓`, `→` | Next line (or start / continue) |
+| `Backspace`, `↑`, `←` | Undo last line |
+| `P` | Play / pause |
+
+### Output
+
+```
+[00:12.40]I've been walking down this road
+[00:15.92]Looking for a place to call my own
+```
+
+Blank lines show as spacing in the synchronizer and are left out of the file.
+
+## Running locally
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-Then open http://localhost:3000. `pnpm build` produces a static production
-build and `pnpm lint` runs ESLint.
+Then open http://localhost:3000. `pnpm build` and `pnpm start` serve the
+production build; `pnpm lint` runs ESLint.
+
+## Stack
+
+Next.js 16 (App Router), React 19, Tailwind CSS 4, shadcn/ui on Base UI,
+next-themes, sonner and lucide. LRC parsing lives in `src/lib/lrc.ts`, the
+shared lyrics store in `src/lib/lyrics-store.ts`, and the audio / stopwatch
+clock in `src/hooks/use-clock.ts`.
