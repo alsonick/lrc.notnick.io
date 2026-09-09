@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Inter } from "next/font/google";
 
 import { Footer } from "@/components/footer";
+import { MobileNotice } from "@/components/mobile-notice";
 import { SiteHeader } from "@/components/site-header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -152,10 +153,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
         <ThemeProvider>
           <TooltipProvider>
-            <SiteHeader />
-            <main className="flex flex-1 flex-col">{children}</main>
-            <Footer />
+            {/* The app is desktop-only: hidden below `sm`, where MobileNotice shows instead. */}
+            <div className="hidden flex-1 flex-col sm:flex">
+              <SiteHeader />
+              <main className="flex flex-1 flex-col">{children}</main>
+              <Footer />
+            </div>
           </TooltipProvider>
+          <MobileNotice />
           <Toaster position="bottom-center" richColors />
         </ThemeProvider>
       </body>

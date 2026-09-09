@@ -2,7 +2,6 @@
 
 import {
   useEffect,
-  useLayoutEffect,
   useRef,
   useState,
   type KeyboardEvent,
@@ -128,14 +127,6 @@ function LineEditor({
     else onCancel();
   }
 
-  // Grow with the text instead of scrolling inside the row.
-  useLayoutEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-    element.style.height = "0px";
-    element.style.height = `${element.scrollHeight}px`;
-  }, [draft]);
-
   // Focus with the caret at the end, ready to fix or extend the line.
   useEffect(() => {
     const element = ref.current;
@@ -154,18 +145,31 @@ function LineEditor({
     }
   }
 
+  // The textarea sits on top of an invisible copy of the draft in a one-cell
+  // grid. The copy is laid out by the same text engine as the read-only line,
+  // so the row keeps its exact height. Sizing from `scrollHeight` rounded to
+  // whole pixels and nudged every row below by half a pixel.
   return (
-    <textarea
-      ref={ref}
-      value={draft}
-      rows={1}
-      spellCheck={false}
-      enterKeyHint="done"
-      aria-label="Edit line"
-      onChange={(event) => setDraft(event.target.value)}
-      onKeyDown={onKeyDown}
-      onBlur={() => finish(true)}
-      className="-mx-1 min-w-0 flex-1 resize-none overflow-hidden rounded bg-white/10 px-1 py-0 text-white ring-1 ring-white/30 outline-none focus:ring-primary/70"
-    />
+    <span className="-mx-1 grid min-w-0 flex-1">
+      <span
+        aria-hidden
+        className="invisible col-start-1 row-start-1 px-1 break-words whitespace-pre-wrap"
+      >
+        {draft}
+        {"\u200b"}
+      </span>
+      <textarea
+        ref={ref}
+        value={draft}
+        rows={1}
+        spellCheck={false}
+        enterKeyHint="done"
+        aria-label="Edit line"
+        onChange={(event) => setDraft(event.target.value)}
+        onKeyDown={onKeyDown}
+        onBlur={() => finish(true)}
+        className="col-start-1 row-start-1 min-w-0 resize-none overflow-hidden rounded bg-white/10 px-1 py-0 text-white ring-1 ring-white/30 outline-none break-words whitespace-pre-wrap focus:ring-primary/70"
+      />
+    </span>
   );
 }

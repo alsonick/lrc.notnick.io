@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 
+import { FeedbackDialog } from "@/components/feedback-dialog";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -41,12 +42,11 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-neutral-900 text-white">
       <div className="mx-auto flex h-14 w-full max-w-5xl items-center gap-3 px-4 sm:gap-4">
-        <Link
-          href="/"
-          aria-label={`${SITE_NAME} home`}
-          className="flex shrink-0 items-center"
-        >
+        <Link href="/" className="flex shrink-0 items-center gap-2">
           <Logo className="size-7" />
+          <span className="text-lg font-semibold tracking-tight">
+            {SITE_NAME}
+          </span>
         </Link>
         <nav className="ml-auto flex items-center gap-0.5 sm:gap-1">
           {NAV.map((item) => {
@@ -66,6 +66,7 @@ export function SiteHeader() {
             );
           })}
           <HelpDialog />
+          <FeedbackDialog className="text-neutral-300 hover:bg-white/10 hover:text-white dark:hover:bg-white/10" />
           <ThemeToggle className="text-neutral-300 hover:bg-white/10 hover:text-white aria-expanded:bg-white/15 aria-expanded:text-white dark:hover:bg-white/10" />
         </nav>
       </div>
