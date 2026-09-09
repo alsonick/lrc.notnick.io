@@ -10,6 +10,7 @@ import {
   CaseUpper,
   Copy,
   Download,
+  Parentheses,
   RotateCcw,
   Scissors,
 } from "lucide-react";
@@ -26,6 +27,7 @@ import {
   countSynced,
   parseLyrics,
   restoreOriginalCase,
+  stripParentheses,
   stripSections,
   stripTags,
   type TransformResult,
@@ -173,6 +175,22 @@ export function LyricsEditor() {
           >
             <Brackets />
             Strip tags
+          </Button>
+          <Button
+            variant="outline"
+            disabled={empty}
+            onClick={() =>
+              transform(
+                stripParentheses,
+                (count) =>
+                  `Removed ${count} ${count === 1 ? "parenthesis" : "parentheses"}`,
+                "No parentheses found",
+              )
+            }
+            title="Remove asides in parentheses, like (Let's go)"
+          >
+            <Parentheses />
+            Strip parentheses
           </Button>
           <Button
             variant="outline"

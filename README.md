@@ -14,6 +14,8 @@ Paste lyrics from Genius or anywhere else, then tidy them with the toolbar:
 - **Strip sections** removes `[Verse 1]`, `[Chorus]` and other headers, plus
   the leftovers Genius adds when copying.
 - **Strip tags** removes existing `[mm:ss.xx]` time tags and metadata lines.
+- **Strip parentheses** removes asides such as `(Let's go)` and drops lines
+  that were nothing but one.
 - **lowercase** / **UPPERCASE** change the case. **Original** restores the
   pasted casing.
 - **Reset** clears the editor.
@@ -71,6 +73,11 @@ pnpm dev
 
 Then open http://localhost:3000. `pnpm build` and `pnpm start` serve the
 production build; `pnpm lint` runs ESLint.
+
+The **Feedback** button in the header posts to a Discord webhook. Copy
+`.env.example` to `.env.local` and set `DISCORD_WEBHOOK_URL` (Discord: Server
+Settings > Integrations > Webhooks > New Webhook). Without it the form shows
+"Feedback isn't set up on this server yet."
 
 ## Stack
 

@@ -171,6 +171,44 @@ export function stripTags(text: string): TransformResult {
   return { text: out.join("\n"), count };
 }
 
+/** A parenthesized aside with nothing nested inside it, plus the spaces before it. */
+const PAREN_GROUP_RE = /[ \t]*(?:\([^()]*\)|（[^（）]*）)/g;
+
+/**
+ * Removes asides in parentheses such as `(Let's go)` while leaving time tags
+ * and metadata alone. Innermost groups go first so nested asides are removed
+ * too; an unmatched `(` is left as it is. A line that was nothing but an
+ * aside disappears entirely, like a tag-only line in `stripTags`.
+ */
+export function stripParentheses(text: string): TransformResult {
+  const out: string[] = [];
+  let count = 0;
+  for (const line of toLines(text)) {
+    if (ID_TAG_LINE_RE.test(line)) {
+      out.push(line);
+      continue;
+    }
+    const prefix = LEADING_TIME_TAGS_RE.exec(line)?.[0] ?? "";
+    let body = line.slice(prefix.length);
+    let removed = 0;
+    for (;;) {
+      const groups = body.match(PAREN_GROUP_RE);
+      if (!groups) break;
+      removed += groups.length;
+      body = body.replace(PAREN_GROUP_RE, "");
+    }
+    if (removed === 0) {
+      out.push(line);
+      continue;
+    }
+    count += removed;
+    const next = body.replace(/[ \t]{2,}/g, " ").trim();
+    if (next === "") continue;
+    out.push(prefix + next);
+  }
+  return { text: out.join("\n"), count };
+}
+
 /** Changes the case of lyric text while leaving time tags and metadata alone. */
 export function changeCase(
   text: string,

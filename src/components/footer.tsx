@@ -1,4 +1,6 @@
 import { FooterLink } from "@/components/footer-link";
+import { GitHubIcon } from "@/components/github-icon";
+import { Button } from "@/components/ui/button";
 import { FULL_NAME } from "@/lib/constants";
 import { social } from "@/lib/social-links";
 
@@ -33,6 +35,22 @@ export function Footer() {
           .
         </p>
       </div>
+      <Button
+        variant="outline"
+        size="sm"
+        nativeButton={false}
+        render={
+          <a
+            href={social.github.link}
+            title={social.github.title}
+            target="_blank"
+            rel="noopener noreferrer"
+          />
+        }
+      >
+        <GitHubIcon />
+        GitHub
+      </Button>
     </footer>
   );
 }
