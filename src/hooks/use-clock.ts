@@ -12,7 +12,7 @@ import {
 /**
  * Time source for synchronization. With an audio URL it drives an `<audio>`
  * element; without one it is a plain stopwatch so lyrics can be synced to
- * music playing somewhere else.
+ * music playing somewhere else. `volume` (0 to 1) only applies to audio.
  */
 export type Clock = {
   /**
@@ -42,7 +42,7 @@ export type Clock = {
   };
 };
 
-export function useClock(audioUrl: string | null): Clock {
+export function useClock(audioUrl: string | null, volume = 1): Clock {
   const usingAudio = audioUrl !== null;
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const stopwatch = useRef<{ base: number; startedAt: number | null }>({
@@ -55,6 +55,12 @@ export function useClock(audioUrl: string | null): Clock {
   const [duration, setDuration] = useState<number | null>(null);
   const [ready, setReady] = useState(!usingAudio);
   const [error, setError] = useState<string | null>(null);
+
+  // The <audio> element owns its volume, so mirror the current value onto it.
+  useEffect(() => {
+    const element = audioRef.current;
+    if (element) element.volume = Math.min(1, Math.max(0, volume));
+  }, [volume]);
 
   const now = useCallback((): number => {
     if (usingAudio) return audioRef.current?.currentTime ?? 0;

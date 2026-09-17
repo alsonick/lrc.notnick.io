@@ -1,3 +1,5 @@
+import { ExternalLink } from "react-feather";
+
 import { FooterLink } from "@/components/footer-link";
 import { GitHubIcon } from "@/components/github-icon";
 import { Button } from "@/components/ui/button";
@@ -37,7 +39,6 @@ export function Footer() {
       </div>
       <Button
         variant="outline"
-        size="sm"
         nativeButton={false}
         render={
           <a
@@ -50,6 +51,7 @@ export function Footer() {
       >
         <GitHubIcon />
         GitHub
+        <ExternalLink className="ml-px" strokeWidth={2.5} aria-hidden />
       </Button>
     </footer>
   );

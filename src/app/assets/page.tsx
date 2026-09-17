@@ -2,7 +2,7 @@ import { statSync } from "node:fs";
 import path from "node:path";
 import type { Metadata } from "next";
 import Image from "next/image";
-import { Download } from "lucide-react";
+import { Download } from "react-feather";
 
 import { Button } from "@/components/ui/button";
 import { SITE_NAME } from "@/lib/constants";

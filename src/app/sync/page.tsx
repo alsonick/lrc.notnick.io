@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 
 import { SyncPage } from "@/components/sync/sync-page";
+import { SITE_DESCRIPTION } from "@/lib/constants";
 
-const title = "Synchronize lyrics to audio";
+const title = "Synchronize";
 const description =
-  "Play your song and stamp each lyric line as it is sung to build a timed .lrc file. Undo any line, rewind, and download the finished file.";
+  SITE_DESCRIPTION
 
 export const metadata: Metadata = {
   title,
