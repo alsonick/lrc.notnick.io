@@ -4,16 +4,16 @@ import type { ComponentType, ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  AudioLines,
-  CircleHelp,
-  ClipboardPaste,
+  Activity,
+  Clipboard,
+  CornerUpLeft,
   Download,
-  FileAudio,
-  PencilLine,
+  Edit3,
+  HelpCircle,
+  Music,
   Play,
-  Undo2,
   X,
-} from "lucide-react";
+} from "react-feather";
 
 import { FeedbackDialog } from "@/components/feedback-dialog";
 import { Logo } from "@/components/logo";
@@ -32,9 +32,13 @@ import { SITE_NAME } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { href: "/", label: "Editor", icon: PencilLine },
-  { href: "/sync", label: "Synchronize", icon: AudioLines },
+  { href: "/", label: "Editor", icon: Edit3 },
+  { href: "/sync", label: "Synchronize", icon: Activity },
 ] as const;
+
+/** Keeps the Help, Feedback and theme buttons on the same shape as the links. */
+const NAV_BUTTON_CLASS =
+  "rounded-md text-neutral-300 hover:bg-white/10 hover:text-white dark:hover:bg-white/10";
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -42,11 +46,12 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-neutral-900 text-white">
       <div className="mx-auto flex h-14 w-full max-w-5xl items-center gap-3 px-4 sm:gap-4">
-        <Link href="/" className="flex shrink-0 items-center gap-2">
+        <Link
+          href="/"
+          aria-label={SITE_NAME}
+          className="flex shrink-0 items-center"
+        >
           <Logo className="size-7" />
-          <span className="text-lg font-semibold tracking-tight">
-            {SITE_NAME}
-          </span>
         </Link>
         <nav className="ml-auto flex items-center gap-0.5 sm:gap-1">
           {NAV.map((item) => {
@@ -66,8 +71,13 @@ export function SiteHeader() {
             );
           })}
           <HelpDialog />
-          <FeedbackDialog className="text-neutral-300 hover:bg-white/10 hover:text-white dark:hover:bg-white/10" />
-          <ThemeToggle className="text-neutral-300 hover:bg-white/10 hover:text-white aria-expanded:bg-white/15 aria-expanded:text-white dark:hover:bg-white/10" />
+          <FeedbackDialog className={NAV_BUTTON_CLASS} />
+          <ThemeToggle
+            className={cn(
+              NAV_BUTTON_CLASS,
+              "aria-expanded:bg-white/15 aria-expanded:text-white",
+            )}
+          />
         </nav>
       </div>
     </header>
@@ -82,12 +92,12 @@ type Step = {
 
 const STEPS: Step[] = [
   {
-    icon: ClipboardPaste,
+    icon: Clipboard,
     title: "Paste your lyrics",
     body: "Copy them from Genius or anywhere else.",
   },
   {
-    icon: FileAudio,
+    icon: Music,
     title: "Load your song",
     body: (
       <>
@@ -109,7 +119,7 @@ const STEPS: Step[] = [
     ),
   },
   {
-    icon: Undo2,
+    icon: CornerUpLeft,
     title: "Fix a mistake",
     body: (
       <>
@@ -143,15 +153,9 @@ function HelpDialog() {
   return (
     <Dialog>
       <DialogTrigger
-        render={
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-neutral-300 hover:bg-white/10 hover:text-white dark:hover:bg-white/10"
-          />
-        }
+        render={<Button variant="ghost" className={NAV_BUTTON_CLASS} />}
       >
-        <CircleHelp />
+        <HelpCircle />
         <span className="sr-only sm:not-sr-only">Help</span>
       </DialogTrigger>
       <DialogContent
@@ -176,7 +180,7 @@ function HelpDialog() {
           <DialogHeader>
             <div className="flex items-center gap-3">
               <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
-                <AudioLines className="size-5" />
+                <Activity className="size-5" />
               </span>
               <DialogTitle className="text-lg">How to make an LRC file</DialogTitle>
             </div>

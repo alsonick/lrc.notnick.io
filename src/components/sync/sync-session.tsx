@@ -9,21 +9,22 @@ import {
   type ReactNode,
 } from "react";
 import {
+  AlertTriangle,
   Check,
   ChevronRight,
   Download,
-  FileAudio,
+  Edit3,
+  Music,
   Pause,
-  PencilLine,
   Play,
   RotateCcw,
-  TriangleAlert,
-} from "lucide-react";
+} from "react-feather";
 import { toast } from "sonner";
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { LyricRow, type LineState } from "@/components/sync/lyric-row";
 import { ToolbarButton } from "@/components/sync/toolbar-button";
+import { VolumeControl } from "@/components/sync/volume-control";
 import { Kbd } from "@/components/ui/kbd";
 import {
   Select,
@@ -84,7 +85,11 @@ export function SyncSession({
   onPickAudio,
   onEditor,
 }: Props) {
-  const clock = useClock(audio?.url ?? null);
+  const [volume, setVolume] = usePersistedState<number>(
+    "lrc.notnick.io:volume",
+    1,
+  );
+  const clock = useClock(audio?.url ?? null, volume);
   const { isPlaying, now, play, pause, seek } = clock;
   const [anticipation, setAnticipation] = usePersistedState<number>(
     "lrc.notnick.io:anticipation",
@@ -392,7 +397,7 @@ export function SyncSession({
               role="alert"
               className="mb-4 flex items-center gap-2 rounded-md bg-rose-500/20 px-3 py-2 text-sm text-rose-100 ring-1 ring-rose-400/40"
             >
-              <TriangleAlert className="size-4 shrink-0" />
+              <AlertTriangle className="size-4 shrink-0" />
               {clock.error}
             </p>
           ) : null}
@@ -427,7 +432,7 @@ export function SyncSession({
               onEditor();
             }}
           >
-            <PencilLine />
+            <Edit3 />
             Editor
           </ToolbarButton>
 
@@ -443,7 +448,7 @@ export function SyncSession({
             <TooltipTrigger
               render={<ToolbarButton onClick={onPickAudio} className="max-w-36" />}
             >
-              <FileAudio />
+              <Music />
               <span className="truncate">{audio ? audio.name : "Audio"}</span>
             </TooltipTrigger>
             <TooltipContent>
@@ -452,6 +457,10 @@ export function SyncSession({
                 : "Load an audio file (MP3, M4A, OGG, WAV…)"}
             </TooltipContent>
           </Tooltip>
+
+          {audio ? (
+            <VolumeControl volume={volume} onVolumeChange={setVolume} />
+          ) : null}
 
           <div className="flex items-stretch">
             <Select
@@ -486,7 +495,7 @@ export function SyncSession({
             </ToolbarButton>
           </div>
 
-          <div className="flex items-stretch">
+          <div className="flex flex-1 items-stretch">
             <Select
               value={String(anticipation)}
               onValueChange={(value) => {
@@ -514,7 +523,7 @@ export function SyncSession({
               disabled={!done && !isPlaying}
               title={done ? "Download the .lrc" : undefined}
               className={cn(
-                "min-w-28 rounded-l-none border-l-0",
+                "min-w-28 flex-1 rounded-l-none border-l-0",
                 done && READY_CLASS,
               )}
             >

@@ -3,17 +3,17 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  AudioLines,
-  Brackets,
-  CaseLower,
-  CaseSensitive,
-  CaseUpper,
+  Activity,
+  ChevronsDown,
+  ChevronsUp,
+  Code,
   Copy,
   Download,
-  Parentheses,
   RotateCcw,
   Scissors,
-} from "lucide-react";
+  Tag,
+  Type,
+} from "react-feather";
 import { toast } from "sonner";
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -173,7 +173,7 @@ export function LyricsEditor() {
               )
             }
           >
-            <Brackets />
+            <Tag />
             Strip tags
           </Button>
           <Button
@@ -189,8 +189,8 @@ export function LyricsEditor() {
             }
             title="Remove asides in parentheses, like (Let's go)"
           >
-            <Parentheses />
-            Strip parentheses
+            <Code />
+            Strip ()
           </Button>
           <Button
             variant="outline"
@@ -204,7 +204,7 @@ export function LyricsEditor() {
               );
             }}
           >
-            <CaseLower />
+            <ChevronsDown />
             lowercase
           </Button>
           <Button
@@ -219,7 +219,7 @@ export function LyricsEditor() {
               );
             }}
           >
-            <CaseUpper />
+            <ChevronsUp />
             UPPERCASE
           </Button>
           <Button
@@ -228,7 +228,7 @@ export function LyricsEditor() {
             onClick={restoreCase}
             title="Put the casing back the way the lyrics were pasted"
           >
-            <CaseSensitive />
+            <Type />
             Original
           </Button>
           <Button
@@ -272,7 +272,7 @@ export function LyricsEditor() {
               disabled={stats.lines === 0}
               onClick={() => router.push("/sync")}
             >
-              <AudioLines />
+              <Activity />
               Synchronize
             </Button>
           </div>

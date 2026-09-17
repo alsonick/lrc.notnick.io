@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, type MouseEvent } from "react";
-import { Monitor, Moon, Sun } from "lucide-react";
+import { Monitor, Moon, Sun } from "react-feather";
 import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
@@ -74,7 +74,7 @@ export function ThemeToggle({ className }: { className?: string }) {
         render={
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="icon"
             aria-label="Change theme"
             className={cn("relative", className)}
           />

@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { usePathname } from "next/navigation";
-import { MessageSquareText, Send } from "lucide-react";
+import { MessageSquare, Send } from "react-feather";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -71,9 +71,9 @@ export function FeedbackDialog({ className }: { className?: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
-        render={<Button variant="ghost" size="sm" className={className} />}
+        render={<Button variant="ghost" className={className} />}
       >
-        <MessageSquareText />
+        <MessageSquare />
         Feedback
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
