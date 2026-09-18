@@ -11,9 +11,11 @@ export function Footer() {
     <footer className="mx-auto mt-5 flex w-full max-w-5xl items-center justify-between border-t border-border px-4 pt-10 pb-2">
       <div className="flex flex-col gap-0.5 text-xs text-muted-foreground">
         <h2 className="text-base font-bold text-neutral-600 sm:text-lg dark:text-neutral-300">
-          {FULL_NAME}
+          LRC Generator
         </h2>
-        <p>&copy; {new Date().getFullYear()} | All rights reserved.</p>
+        <p>
+          &copy; {new Date().getFullYear()} | {FULL_NAME}
+        </p>
         <p>
           Made with{" "}
           <FooterLink link="https://nextjs.org/" title="Next.js">
@@ -49,7 +51,8 @@ export function Footer() {
           />
         }
       >
-        <GitHubIcon />
+        {/* Opts out of the icon hover bounce in globals.css. */}
+        <GitHubIcon className="transform-none" />
         GitHub
         <ExternalLink className="ml-px" strokeWidth={2.5} aria-hidden />
       </Button>

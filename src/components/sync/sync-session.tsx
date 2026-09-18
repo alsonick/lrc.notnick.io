@@ -65,6 +65,19 @@ const READY_CLASS =
 const SELECT_TRIGGER_CLASS =
   "min-h-10 w-[4.25rem] rounded-r-none border-neutral-300 bg-white text-neutral-900 hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700";
 
+/** The keycap under the synchronizer that each shortcut key lights up. */
+const SHORTCUT_KEYCAPS: Partial<Record<string, string>> = {
+  Enter: "Enter",
+  " ": "Space",
+  Backspace: "Backspace",
+  p: "P",
+  P: "P",
+};
+
+/** Keycaps sink quickly while held and spring back on release. */
+const KEYCAP_CLASS =
+  "[transition:translate_500ms_var(--ease-spring),scale_500ms_var(--ease-spring),color_200ms,background-color_200ms,border-color_200ms] data-pressed:translate-y-px data-pressed:scale-90 data-pressed:border-primary/50 data-pressed:bg-primary/20 data-pressed:text-primary data-pressed:duration-75 data-pressed:ease-out motion-reduce:transition-none dark:data-pressed:border-primary/50 dark:data-pressed:bg-primary/20 dark:data-pressed:text-primary";
+
 type Props = {
   lines: LyricLine[];
   onLinesChange: (next: LyricLine[]) => void;
@@ -103,6 +116,10 @@ export function SyncSession({
   const [resetOpen, setResetOpen] = useState(false);
   /** Index of the line whose text is being edited inline, if any. */
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  /** Keycaps whose key is held down right now. */
+  const [pressedKeycaps, setPressedKeycaps] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
   const listRef = useRef<HTMLDivElement>(null);
 
   /** Indices of lines that actually get a timestamp (blank lines are skipped). */
@@ -280,11 +297,23 @@ export function SyncSession({
       }
       return false;
     };
+    const setKeycapPressed = (key: string, pressed: boolean) => {
+      const keycap = SHORTCUT_KEYCAPS[key];
+      if (!keycap) return;
+      setPressedKeycaps((current) => {
+        if (current.has(keycap) === pressed) return current;
+        const next = new Set(current);
+        if (pressed) next.add(keycap);
+        else next.delete(keycap);
+        return next;
+      });
+    };
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey) {
         return;
       }
       if (isTyping(event)) return;
+      setKeycapPressed(event.key, true);
       switch (event.key) {
         case "Enter":
         case " ":
@@ -310,13 +339,19 @@ export function SyncSession({
     // Buttons activate on Space *keyup*. Without this, a Space press after
     // clicking Next Line with the mouse would stamp twice.
     const onKeyUp = (event: KeyboardEvent) => {
+      setKeycapPressed(event.key, false);
       if (event.key === " " && !isTyping(event)) event.preventDefault();
     };
+    // A key released while the window is in the background never reports
+    // its keyup, so let every keycap go when focus leaves.
+    const onBlur = () => setPressedKeycaps(new Set());
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
+    window.addEventListener("blur", onBlur);
     return () => {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("blur", onBlur);
     };
   }, [isPlaying, nextLine, togglePlayback, undoLast]);
 
@@ -386,7 +421,7 @@ export function SyncSession({
 
       <section
         aria-label="Synchronizer"
-        className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-gradient-to-b from-neutral-500 via-neutral-600 to-neutral-800 shadow-lg ring-1 ring-black/20 dark:from-neutral-800 dark:via-neutral-900 dark:to-neutral-950 dark:ring-white/10"
+        className="isolate flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-gradient-to-b from-neutral-500 via-neutral-600 to-neutral-800 shadow-lg ring-1 ring-black/20 dark:from-neutral-800 dark:via-neutral-900 dark:to-neutral-950 dark:ring-white/10"
       >
         <div
           ref={listRef}
@@ -422,9 +457,11 @@ export function SyncSession({
           </ol>
         </div>
 
+        {/* Rounded itself as well: while an icon's hover bounce runs, Chrome
+            can paint this background outside the section's rounded clip. */}
         <div
           aria-label="Playback controls"
-          className="flex flex-wrap items-center gap-2 border-t border-white/10 bg-neutral-950/85 px-3 py-3"
+          className="flex flex-wrap items-center gap-2 rounded-b-xl border-t border-white/10 bg-neutral-950/85 px-3 py-3"
         >
           <ToolbarButton
             onClick={() => {
@@ -561,13 +598,16 @@ export function SyncSession({
 
       <p className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
         <span>
-          <Kbd>Enter</Kbd> / <Kbd>Space</Kbd> next line
+          <Keycap pressed={pressedKeycaps.has("Enter")}>Enter</Keycap> /{" "}
+          <Keycap pressed={pressedKeycaps.has("Space")}>Space</Keycap> next
+          line
         </span>
         <span>
-          <Kbd>Backspace</Kbd> undo last line
+          <Keycap pressed={pressedKeycaps.has("Backspace")}>Backspace</Keycap>{" "}
+          undo last line
         </span>
         <span>
-          <Kbd>P</Kbd> play / pause
+          <Keycap pressed={pressedKeycaps.has("P")}>P</Keycap> play / pause
         </span>
       </p>
 
@@ -581,6 +621,21 @@ export function SyncSession({
         onConfirm={resetAll}
       />
     </div>
+  );
+}
+
+/** Shortcut hint that sinks while its key is held down. */
+function Keycap({
+  pressed,
+  children,
+}: {
+  pressed: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <Kbd data-pressed={pressed || undefined} className={KEYCAP_CLASS}>
+      {children}
+    </Kbd>
   );
 }
 

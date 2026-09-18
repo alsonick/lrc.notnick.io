@@ -81,7 +81,7 @@ export function FeedbackDialog({ className }: { className?: string }) {
           <DialogHeader>
             <DialogTitle>Send feedback</DialogTitle>
             <DialogDescription>
-              Found a bug or have an idea? It goes straight to the developer.
+              Found a bug or have an idea?
             </DialogDescription>
           </DialogHeader>
 
@@ -98,7 +98,7 @@ export function FeedbackDialog({ className }: { className?: string }) {
                 value={contact}
                 onChange={(event) => setContact(event.target.value)}
                 maxLength={CONTACT_MAX_LENGTH}
-                placeholder="Email or Discord handle, if you'd like a reply"
+                placeholder="Email (hi@notnick.io)"
                 autoComplete="email"
               />
             </div>

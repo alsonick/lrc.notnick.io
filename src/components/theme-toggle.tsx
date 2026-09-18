@@ -80,8 +80,10 @@ export function ThemeToggle({ className }: { className?: string }) {
           />
         }
       >
-        <Sun className="size-4 scale-100 rotate-0 transition-transform duration-300 dark:scale-0 dark:-rotate-90" />
-        <Moon className="absolute size-4 scale-0 rotate-90 transition-transform duration-300 dark:scale-100 dark:rotate-0" />
+        {/* The swap eases `scale` and `rotate`; `transform` is left to the
+            hover bounce in globals.css, so both effects stack. */}
+        <Sun className="size-4 scale-100 rotate-0 [transition:scale_300ms,rotate_300ms,transform_500ms_var(--ease-spring)] dark:scale-0 dark:-rotate-90" />
+        <Moon className="absolute size-4 scale-0 rotate-90 [transition:scale_300ms,rotate_300ms,transform_500ms_var(--ease-spring)] dark:scale-100 dark:rotate-0" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-36">
         <DropdownMenuRadioGroup value={theme ?? "system"}>
