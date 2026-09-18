@@ -49,7 +49,7 @@ export function SiteHeader() {
         <Link
           href="/"
           aria-label={SITE_NAME}
-          className="flex shrink-0 items-center"
+          className="press-bounce flex shrink-0 items-center"
         >
           <Logo className="size-7" />
         </Link>

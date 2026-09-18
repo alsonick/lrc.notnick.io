@@ -175,3 +175,34 @@
     box-shadow 350ms ease,
     transform 350ms ease !important;
 }
+
+/* Icons spring up a little while they, or the control they sit in, are
+   hovered, and spring back once the pointer leaves. Kept in the base layer so
+   an icon with its own transition utilities (see theme-toggle.tsx) wins. */
+:root {
+  /* A damped spring: overshoots its target by about 20%, then settles. */
+  --ease-spring: linear(0, 0.036 2.3%, 0.153 5%, 0.299 7.4%, 0.763 14.2%, 0.982 18.2%, 1.121 22%, 1.192 25.9%, 1.205 28.7%, 1.191 31.9%, 1.014 45.8%, 0.962 53.9%, 0.961 60.5%, 1.007 81%, 1);
+}
+
+@layer base {
+  @media (prefers-reduced-motion: no-preference) {
+    svg {
+      transition: transform 500ms var(--ease-spring);
+    }
+
+    /* Hover only where there is a real pointer, so a tap doesn't leave the
+       icon stuck at the larger size. */
+    @media (hover: hover) {
+      :is(a, button, [role="button"], [role="combobox"], [role^="menuitem"], [role="option"]):hover svg,
+      svg:hover {
+        transform: scale(1.15);
+      }
+    }
+
+    /* Pressing sinks the icon, releasing springs it back (the header logo). */
+    .press-bounce:active svg {
+      transform: scale(0.85);
+      transition-duration: 300ms;
+    }
+  }
+}
