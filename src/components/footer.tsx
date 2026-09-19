@@ -14,7 +14,7 @@ export function Footer() {
           LRC Generator
         </h2>
         <p>
-          &copy; {new Date().getFullYear()} | {FULL_NAME}
+          &copy; {new Date().getFullYear()} | {FULL_NAME} | MIT
         </p>
         <p>
           Made with{" "}
