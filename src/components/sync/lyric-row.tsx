@@ -94,12 +94,12 @@ export function LyricRow({
           type="button"
           onClick={onEdit}
           aria-label={`Edit "${text}"`}
-          className="-mx-1 min-w-0 flex-1 cursor-text rounded px-1 text-left break-words outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white/60"
+          className="-mx-1 min-w-0 flex-1 cursor-text rounded px-1 text-left wrap-break-word outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white/60"
         >
           {text}
         </button>
       ) : (
-        <span className="min-w-0 flex-1 break-words">{text}</span>
+        <span className="min-w-0 flex-1 wrap-break-word">{text}</span>
       )}
       {stamped && time !== null ? (
         <span className="shrink-0 font-mono text-xs font-normal text-white/40 tabular-nums">
@@ -162,7 +162,7 @@ function LineEditor({
     <span className="-mx-1 grid min-w-0 flex-1">
       <span
         aria-hidden
-        className="invisible col-start-1 row-start-1 px-1 break-words whitespace-pre-wrap"
+        className="invisible col-start-1 row-start-1 px-1 wrap-break-word whitespace-pre-wrap"
       >
         {draft}
         {"\u200b"}
@@ -177,7 +177,7 @@ function LineEditor({
         onChange={(event) => setDraft(event.target.value)}
         onKeyDown={onKeyDown}
         onBlur={() => finish(true)}
-        className="col-start-1 row-start-1 min-w-0 resize-none overflow-hidden rounded bg-white/10 px-1 py-0 text-white ring-1 ring-white/30 outline-none break-words whitespace-pre-wrap focus:ring-primary/70"
+        className="col-start-1 row-start-1 min-w-0 resize-none overflow-hidden rounded bg-white/10 px-1 py-0 text-white ring-1 ring-white/30 outline-none wrap-break-word whitespace-pre-wrap focus:ring-primary/70"
       />
     </span>
   );

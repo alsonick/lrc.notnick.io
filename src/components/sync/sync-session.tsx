@@ -466,11 +466,11 @@ export function SyncSession({
 
       <section
         aria-label="Synchronizer"
-        className="isolate flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-gradient-to-b from-neutral-500 via-neutral-600 to-neutral-800 shadow-lg ring-1 ring-black/20 dark:from-neutral-800 dark:via-neutral-900 dark:to-neutral-950 dark:ring-white/10"
+        className="isolate flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-linear-to-b from-neutral-500 via-neutral-600 to-neutral-800 shadow-lg ring-1 ring-black/20 dark:from-neutral-800 dark:via-neutral-900 dark:to-neutral-950 dark:ring-white/10"
       >
         <div
           ref={listRef}
-          className="min-h-0 flex-1 overflow-y-auto px-1 py-3 [scrollbar-color:rgba(255,255,255,0.35)_transparent] [scrollbar-width:thin] sm:px-2"
+          className="min-h-0 flex-1 overflow-y-auto px-1 py-3 [scrollbar-color:rgba(255,255,255,0.35)_transparent] scrollbar-thin sm:px-2"
         >
           {clock.error ? (
             <p
