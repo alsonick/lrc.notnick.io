@@ -23,7 +23,7 @@ import { toast } from "sonner";
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { ExportPanel } from "@/components/export/export-panel";
-import { FinishDialog } from "@/components/export/finish-dialog";
+import { FinishDialog, type LrcFile } from "@/components/export/finish-dialog";
 import { LyricRow, type LineState } from "@/components/sync/lyric-row";
 import { ToolbarButton } from "@/components/sync/toolbar-button";
 import { VolumeControl } from "@/components/sync/volume-control";
@@ -48,6 +48,9 @@ import {
   buildLrcFile,
   formatClock,
   isLyric,
+  parseLyrics,
+  serializeLyrics,
+  trimBlankEdges,
   type LyricLine,
 } from "@/lib/lrc";
 import type { AudioSource } from "@/lib/lyrics-store";
@@ -124,6 +127,8 @@ export function SyncSession({
   /** The question Done asks: edit and convert, or download as it is. */
   const [finishOpen, setFinishOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  /** An .lrc picked in the Done dialog, edited in place of the lyrics. */
+  const [upload, setUpload] = useState<LrcFile | null>(null);
   /** Next Line / Done, where focus returns once the export panel closes. */
   const nextButtonRef = useRef<HTMLButtonElement>(null);
   /** Index of the line whose text is being edited inline, if any. */
@@ -390,9 +395,22 @@ export function SyncSession({
     toast.success(`All lines synchronized. Downloaded ${filename}.`);
   }
 
-  function openExport() {
+  /** Opens the export panel on the lyrics, or on a file picked instead. */
+  function openExport(file: LrcFile | null) {
+    setUpload(file);
     setFinishOpen(false);
     setExportOpen(true);
+  }
+
+  /** Puts edits from the export panel into the lyrics, with a toast to undo. */
+  function applyEdits(text: string) {
+    const next = trimBlankEdges(parseLyrics(text));
+    if (serializeLyrics(next) === serializeLyrics(lines)) return;
+    const before = lines;
+    onLinesChange(next);
+    toast.success("Lyrics updated with your edits", {
+      action: { label: "Undo", onClick: () => onLinesChange(before) },
+    });
   }
 
   function stateFor(index: number): LineState {
@@ -659,16 +677,19 @@ export function SyncSession({
         fileBase={fileBase}
         lineCount={syncable.length}
         onDownload={downloadAsIs}
-        onEdit={openExport}
+        onEdit={() => openExport(null)}
+        onUpload={openExport}
       />
 
+      {/* An uploaded file stands on its own: its edits only go into its
+          downloads, and the song loaded here may not be the one it's for. */}
       <ExportPanel
         open={exportOpen}
         onOpenChange={setExportOpen}
-        lines={lines}
-        onLinesChange={onLinesChange}
-        fileBase={fileBase}
-        duration={clock.duration}
+        text={upload ? upload.text : serializeLyrics(lines)}
+        fileBase={upload ? upload.base : fileBase}
+        duration={upload ? null : clock.duration}
+        onApply={upload ? undefined : applyEdits}
         finalFocus={nextButtonRef}
       />
     </div>

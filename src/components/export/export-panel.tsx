@@ -20,7 +20,6 @@ import {
   Info,
   RotateCcw,
 } from "react-feather";
-import { toast } from "sonner";
 
 import {
   LrcCodeEditor,
@@ -42,11 +41,7 @@ import { downloadTextFile } from "@/lib/file";
 import {
   buildLrcFileFromText,
   findLrcIssues,
-  parseLyrics,
-  serializeLyrics,
-  trimBlankEdges,
   type LrcIssue,
-  type LyricLine,
 } from "@/lib/lrc";
 import {
   buildSrtFile,
@@ -68,29 +63,29 @@ const TIME_CLASS = "text-green-700 dark:text-primary";
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  lines: LyricLine[];
-  /** Receives the edited lyrics when the panel closes. */
-  onLinesChange: (next: LyricLine[]) => void;
+  /** The LRC text to edit, read each time the panel opens. */
+  text: string;
   /** File name without its extension. */
   fileBase: string;
   /** Length of the song in seconds, if known, so the last subtitle ends in time. */
   duration: number | null;
+  /** Receives the edited text as the panel closes, for edits that outlive it. */
+  onApply?: (text: string) => void;
   /** Where focus goes when the panel closes. */
   finalFocus?: RefObject<HTMLElement | null>;
 };
 
 /**
- * The panel Done opens on the right: the lyrics as an editable LRC file
- * beside a live preview of the SRT it converts to. Edits go back into the
- * lyrics when the panel closes, with a toast to undo them.
+ * The panel Done opens on the right: an LRC file as editable text beside a
+ * live preview of the SRT it converts to.
  */
 export function ExportPanel({
   open,
   onOpenChange,
-  lines,
-  onLinesChange,
+  text,
   fileBase,
   duration,
+  onApply,
   finalFocus,
 }: Props) {
   const editorRef = useRef<LrcCodeEditorHandle>(null);
@@ -102,13 +97,12 @@ export function ExportPanel({
   const [saved, setSaved] = useState<Format | null>(null);
   const [announcement, setAnnouncement] = useState("");
 
-  // Each opening starts from the lyrics as they are now. The text outlives
-  // the close so the panel keeps showing it while it slides away.
+  // Each opening starts from `text` as it is then. The draft outlives the
+  // close so the panel keeps showing it while it slides away.
   const [wasOpen, setWasOpen] = useState(false);
   if (open !== wasOpen) {
     setWasOpen(open);
     if (open) {
-      const text = serializeLyrics(lines);
       setOriginal(text);
       setDraft(text);
       setActiveLine(0);
@@ -131,19 +125,8 @@ export function ExportPanel({
     return () => window.clearTimeout(id);
   }, [saved]);
 
-  /** Puts the edits into the lyrics, if they change anything. */
-  function applyDraft() {
-    const next = trimBlankEdges(parseLyrics(draft));
-    if (serializeLyrics(next) === serializeLyrics(lines)) return;
-    const before = lines;
-    onLinesChange(next);
-    toast.success("Lyrics updated with your edits", {
-      action: { label: "Undo", onClick: () => onLinesChange(before) },
-    });
-  }
-
   function handleOpenChange(next: boolean) {
-    if (open && !next) applyDraft();
+    if (open && !next && edited) onApply?.(draft);
     onOpenChange(next);
   }
 
