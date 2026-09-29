@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { SyncSession } from "@/components/sync/sync-session";
 import { Button } from "@/components/ui/button";
 import {
+  isLyric,
   parseLyrics,
   serializeLyrics,
   trimBlankEdges,
@@ -43,7 +44,7 @@ export function Synchronizer({ initialText }: { initialText: string }) {
     toast.success(`Loaded ${file.name}`);
   }
 
-  if (!lines.some((line) => line.text !== "")) {
+  if (!lines.some(isLyric)) {
     return (
       <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center px-4 py-16 text-center">
         <h1 className="text-xl font-semibold">Nothing to synchronize yet</h1>
