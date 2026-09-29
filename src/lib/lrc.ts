@@ -28,6 +28,8 @@ const WORD_TAG_GLOBAL_RE = /<\d{1,3}:\d{2}(?:[.:]\d{1,3})?>/g;
 /** Metadata lines such as `[ti: Title]`, `[ar: Artist]`, `[offset: 500]`. */
 const ID_TAG_LINE_RE =
   /^\s*\[(?:ti|ar|al|au|by|offset|re|ve|length|lr|la|tool|#)\s*:[^\]]*\]\s*$/i;
+/** `[offset: +500]`: milliseconds to show every line earlier (later if negative). */
+const OFFSET_LINE_RE = /^\s*\[offset\s*:\s*([+-]?\d+)\s*\]\s*$/i;
 /** A line that is nothing but a single bracketed group, e.g. `[Chorus]`. */
 const BRACKET_ONLY_LINE_RE = /^\s*\[[^[\]]*\]\s*$/;
 /** Leftovers that come along when copying lyrics off Genius. */
@@ -251,10 +253,133 @@ export function restoreOriginalCase(text: string, original: string): string {
     .join("\n");
 }
 
+/** True for LRC metadata such as `[ti: Title]` or `[offset: 500]`. */
+export function isMetadataLine(line: string): boolean {
+  return ID_TAG_LINE_RE.test(line);
+}
+
+/** True for a line that takes a timestamp: it has text and isn't metadata. */
+export function isLyric(line: LyricLine): boolean {
+  return line.text !== "" && !isMetadataLine(line.text);
+}
+
 export function countSyncable(lines: LyricLine[]): number {
-  return lines.filter((line) => line.text !== "").length;
+  return lines.filter(isLyric).length;
 }
 
 export function countSynced(lines: LyricLine[]): number {
-  return lines.filter((line) => line.text !== "" && line.time !== null).length;
+  return lines.filter((line) => isLyric(line) && line.time !== null).length;
+}
+
+/*
+ * Raw LRC text, as edited line by line in the export panel. Unlike
+ * `parseLyrics`, these keep every time tag on a line and never reformat it.
+ */
+
+/** A run of characters in one line of LRC text, for syntax highlighting. */
+export type LrcToken = {
+  /** `time` is the inside of a leading time tag, `bracket` one of its ends. */
+  kind: "text" | "bracket" | "time" | "word" | "meta";
+  text: string;
+};
+
+/**
+ * Splits one line into tokens whose texts join back into exactly that line,
+ * so an editor can colour it without moving a single character.
+ */
+export function tokenizeLrcLine(line: string): LrcToken[] {
+  if (ID_TAG_LINE_RE.test(line)) return [{ kind: "meta", text: line }];
+  const tokens: LrcToken[] = [];
+  const prefix = LEADING_TIME_TAGS_RE.exec(line)?.[0] ?? "";
+  // The prefix is nothing but time tags and the spaces around them.
+  for (const part of prefix.split(/(\[[^\]]*\])/)) {
+    if (part === "") continue;
+    if (part.startsWith("[")) {
+      tokens.push(
+        { kind: "bracket", text: "[" },
+        { kind: "time", text: part.slice(1, -1) },
+        { kind: "bracket", text: "]" },
+      );
+    } else {
+      tokens.push({ kind: "text", text: part });
+    }
+  }
+  const rest = line.slice(prefix.length);
+  let from = 0;
+  for (const match of rest.matchAll(WORD_TAG_GLOBAL_RE)) {
+    if (match.index > from) {
+      tokens.push({ kind: "text", text: rest.slice(from, match.index) });
+    }
+    tokens.push({ kind: "word", text: match[0] });
+    from = match.index + match[0].length;
+  }
+  if (from < rest.length) tokens.push({ kind: "text", text: rest.slice(from) });
+  return tokens;
+}
+
+export type LrcLineInfo =
+  | { kind: "blank" }
+  /** `offset` is in seconds, for an `[offset: …]` line. */
+  | { kind: "meta"; offset: number | null }
+  /** Text without a time tag. Players skip it. */
+  | { kind: "untimed"; text: string }
+  /** `text` is empty for a lone time tag, which ends the line before it. */
+  | { kind: "timed"; times: number[]; text: string };
+
+export function inspectLrcLine(line: string): LrcLineInfo {
+  if (line.trim() === "") return { kind: "blank" };
+  if (ID_TAG_LINE_RE.test(line)) {
+    const offset = OFFSET_LINE_RE.exec(line);
+    return { kind: "meta", offset: offset ? Number(offset[1]) / 1000 : null };
+  }
+  const prefix = LEADING_TIME_TAGS_RE.exec(line)?.[0] ?? "";
+  const text = line
+    .slice(prefix.length)
+    .replace(WORD_TAG_GLOBAL_RE, " ")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+  if (prefix === "") return { kind: "untimed", text };
+  const times = Array.from(prefix.matchAll(TIME_TAG_GLOBAL_RE), (match) =>
+    tagToSeconds(match[1], match[2], match[3]),
+  );
+  return { kind: "timed", times, text };
+}
+
+/** A line of LRC text that probably isn't what its author meant. */
+export type LrcIssue = {
+  /** Index of the line in the text. */
+  line: number;
+  /** `untimed`: lyric with no time tag. `order`: starts before the line above. */
+  kind: "untimed" | "order";
+};
+
+export function findLrcIssues(text: string): LrcIssue[] {
+  const issues: LrcIssue[] = [];
+  let previous = -Infinity;
+  toLines(text).forEach((line, index) => {
+    const info = inspectLrcLine(line);
+    if (info.kind === "untimed") {
+      issues.push({ line: index, kind: "untimed" });
+    } else if (info.kind === "timed") {
+      // A line may carry several tags (a repeated chorus); its first
+      // appearance is what has to follow the timed line above it. Comparing
+      // with that line alone flags one line per mistyped stamp, not every
+      // line after it.
+      const first = Math.min(...info.times);
+      if (first < previous) issues.push({ line: index, kind: "order" });
+      previous = first;
+    }
+  });
+  return issues;
+}
+
+/**
+ * Content for a downloadable `.lrc` file from raw LRC text. Like
+ * `buildLrcFile`, blank lines are dropped; every other line stays as written.
+ */
+export function buildLrcFileFromText(text: string): string {
+  const kept = toLines(text)
+    .map((line) => line.trim())
+    .filter((line) => line !== "");
+  return kept.length === 0 ? "" : `${kept.join("\n")}\n`;
 }

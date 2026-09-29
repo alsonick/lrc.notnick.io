@@ -22,6 +22,8 @@ import {
 import { toast } from "sonner";
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { ExportPanel } from "@/components/export/export-panel";
+import { FinishDialog } from "@/components/export/finish-dialog";
 import { LyricRow, type LineState } from "@/components/sync/lyric-row";
 import { ToolbarButton } from "@/components/sync/toolbar-button";
 import { VolumeControl } from "@/components/sync/volume-control";
@@ -42,7 +44,12 @@ import { useClock, useClockTime, type Clock } from "@/hooks/use-clock";
 import { usePersistedState } from "@/hooks/use-persisted-state";
 import { beep } from "@/lib/beep";
 import { downloadTextFile, stripExtension } from "@/lib/file";
-import { buildLrcFile, formatClock, type LyricLine } from "@/lib/lrc";
+import {
+  buildLrcFile,
+  formatClock,
+  isLyric,
+  type LyricLine,
+} from "@/lib/lrc";
 import type { AudioSource } from "@/lib/lyrics-store";
 import { cn } from "@/lib/utils";
 
@@ -114,6 +121,11 @@ export function SyncSession({
   );
   const [countdown, setCountdown] = useState<number | null>(null);
   const [resetOpen, setResetOpen] = useState(false);
+  /** The question Done asks: edit and convert, or download as it is. */
+  const [finishOpen, setFinishOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  /** Next Line / Done, where focus returns once the export panel closes. */
+  const nextButtonRef = useRef<HTMLButtonElement>(null);
   /** Index of the line whose text is being edited inline, if any. */
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   /** Keycaps whose key is held down right now. */
@@ -122,9 +134,12 @@ export function SyncSession({
   );
   const listRef = useRef<HTMLDivElement>(null);
 
-  /** Indices of lines that actually get a timestamp (blank lines are skipped). */
+  /**
+   * Indices of lines that actually get a timestamp. Blank lines and metadata
+   * such as `[ar: Artist]` are skipped.
+   */
   const syncable = useMemo(
-    () => lines.flatMap((line, index) => (line.text ? [index] : [])),
+    () => lines.flatMap((line, index) => (isLyric(line) ? [index] : [])),
     [lines],
   );
   const position = useMemo(() => {
@@ -162,28 +177,29 @@ export function SyncSession({
     list.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
   }, [currentLine]);
 
+  /** Name for every file saved from this session, taken from the audio. */
+  const fileBase = stripExtension(audio?.name ?? "lyrics") || "lyrics";
+
   /** Downloads the given lines as an .lrc file and returns the file name. */
   const saveLines = useCallback(
     (target: LyricLine[]) => {
-      const base = stripExtension(audio?.name ?? "lyrics") || "lyrics";
-      const filename = `${base}.lrc`;
+      const filename = `${fileBase}.lrc`;
       downloadTextFile(filename, buildLrcFile(target));
       return filename;
     },
-    [audio?.name],
+    [fileBase],
   );
 
-  /** Stops the clock and hands over the file. */
+  /** Stops the clock and asks what to do with the finished file. */
   const finish = useCallback(() => {
     pause();
-    const filename = saveLines(lines);
-    toast.success(`All lines synchronized. Downloaded ${filename}.`);
-  }, [lines, pause, saveLines]);
+    setFinishOpen(true);
+  }, [pause]);
 
   /**
    * Stamps the current line. Once every line is stamped the same button reads
-   * "Done", and that extra press is what downloads the file, so a mistimed
-   * last line can still be undone before anything is saved.
+   * "Done", and that extra press is what offers the file, so a mistimed last
+   * line can still be undone before anything is saved.
    */
   const nextLine = useCallback(() => {
     if (done) {
@@ -368,9 +384,20 @@ export function SyncSession({
     toast.success(`Saved ${saveLines(lines)}`);
   }
 
+  /** Cancel in the Done dialog: the .lrc as it is, as Done used to do. */
+  function downloadAsIs() {
+    const filename = saveLines(lines);
+    toast.success(`All lines synchronized. Downloaded ${filename}.`);
+  }
+
+  function openExport() {
+    setFinishOpen(false);
+    setExportOpen(true);
+  }
+
   function stateFor(index: number): LineState {
     const pos = position.get(index);
-    if (pos === undefined) return "blank";
+    if (pos === undefined) return lines[index].text === "" ? "blank" : "meta";
     if (pos >= cursor) return "upcoming";
     return pos === cursor - 1 ? "current" : "done";
   }
@@ -556,9 +583,14 @@ export function SyncSession({
               </SelectContent>
             </Select>
             <ToolbarButton
+              ref={nextButtonRef}
               onClick={nextLine}
               disabled={!done && !isPlaying}
-              title={done ? "Download the .lrc" : undefined}
+              title={
+                done
+                  ? "Download the .lrc, or edit it and convert it to .srt"
+                  : undefined
+              }
               className={cn(
                 "min-w-28 flex-1 rounded-l-none border-l-0",
                 done && READY_CLASS,
@@ -619,6 +651,25 @@ export function SyncSession({
         confirmLabel="Reset"
         destructive
         onConfirm={resetAll}
+      />
+
+      <FinishDialog
+        open={finishOpen}
+        onOpenChange={setFinishOpen}
+        fileBase={fileBase}
+        lineCount={syncable.length}
+        onDownload={downloadAsIs}
+        onEdit={openExport}
+      />
+
+      <ExportPanel
+        open={exportOpen}
+        onOpenChange={setExportOpen}
+        lines={lines}
+        onLinesChange={onLinesChange}
+        fileBase={fileBase}
+        duration={clock.duration}
+        finalFocus={nextButtonRef}
       />
     </div>
   );

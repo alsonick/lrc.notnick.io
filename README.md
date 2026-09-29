@@ -23,7 +23,8 @@ Paste lyrics from Genius or anywhere else, then tidy them with the toolbar:
 Each of these shows a toast with an Undo button.
 
 Below the text: **Copy**, **Download .lrc** (once something is synced) and
-**Synchronize**. Pasting an existing `.lrc` works; its timestamps are kept.
+**Synchronize**. Pasting an existing `.lrc` works; its timestamps are kept,
+and metadata lines such as `[ar: Artist]` are never stamped.
 
 ## Synchronize
 
@@ -40,12 +41,31 @@ Below the text: **Copy**, **Download .lrc** (once something is synced) and
 - While paused, click a line's text to edit it. Click anywhere else, or
   Continue, to keep the change; `Esc` cancels. Timestamps are kept.
 - Once every line is stamped, Next Line reads **Done**. Click it to stop and
-  download the `.lrc`, named after the audio file. **Save .lrc** downloads it
-  again any time.
+  choose: **Edit** opens the file for a last look (see below), and
+  **Cancel** downloads the `.lrc` as it is. Files are named after the audio
+  file. **Save .lrc** downloads the `.lrc` again any time.
 - **Editor** goes back to the editor with every stamp intact.
 
 Keep the `.lrc` next to the audio with the same file name and most players
 pick it up.
+
+### Edit & convert
+
+A panel slides in from the right with the `.lrc` as editable text, time tags
+highlighted, next to a live preview of the `.srt` it converts to.
+
+- Lines without a timestamp, and timestamps earlier than the line above, are
+  marked. The footer explains the one under the caret and **Next** / **Show**
+  walks through the rest.
+- Click a subtitle in the preview to jump to its line. **Revert** undoes every
+  edit made since the panel opened (and `Cmd/Ctrl+Z` undoes the revert).
+- **Download as LRC** saves the text as it is, minus blank lines.
+- **Download as SRT** converts it. Each subtitle lasts until the next line
+  starts; a timestamp on its own line, like `[01:02.00]`, ends the one before
+  it early; the last one lasts up to five seconds and never runs past the end
+  of the song. Untimed lines are left out, `[offset: …]` is applied, and a
+  line with several timestamps becomes one subtitle per timestamp.
+- Closing the panel keeps the edits in the lyrics, with a toast to undo them.
 
 ### Keyboard
 
@@ -63,6 +83,18 @@ pick it up.
 ```
 
 Blank lines show as spacing in the synchronizer and are left out of the file.
+
+The same lines as `.srt`:
+
+```
+1
+00:00:12,400 --> 00:00:15,920
+I've been walking down this road
+
+2
+00:00:15,920 --> 00:00:20,920
+Looking for a place to call my own
+```
 
 ## Running locally
 
@@ -82,6 +114,7 @@ Settings > Integrations > Webhooks > New Webhook). Without it the form shows
 ## Stack
 
 Next.js 16 (App Router), React 19, Tailwind CSS 4, shadcn/ui on Base UI,
-next-themes, sonner and lucide. LRC parsing lives in `src/lib/lrc.ts`, the
-shared lyrics store in `src/lib/lyrics-store.ts`, and the audio / stopwatch
-clock in `src/hooks/use-clock.ts`.
+next-themes, sonner and lucide. LRC parsing lives in `src/lib/lrc.ts`, SRT
+conversion in `src/lib/srt.ts`, the shared lyrics store in
+`src/lib/lyrics-store.ts`, and the audio / stopwatch clock in
+`src/hooks/use-clock.ts`.

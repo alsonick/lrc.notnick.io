@@ -134,9 +134,10 @@ const STEPS: Step[] = [
     title: "Save the file",
     body: (
       <>
-        Stamp the last line, then hit <strong>Done</strong> to download the
-        .lrc. Keep it next to your audio with the same name so players pick it
-        up.
+        Stamp the last line and hit <strong>Done</strong>.{" "}
+        <strong>Edit</strong> lets you polish the file and save it as .lrc or
+        as .srt subtitles; <strong>Cancel</strong> downloads the .lrc as it is.
+        Keep it next to your audio with the same name so players pick it up.
       </>
     ),
   },

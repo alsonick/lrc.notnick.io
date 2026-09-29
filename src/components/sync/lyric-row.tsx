@@ -10,7 +10,8 @@ import {
 import { formatTime } from "@/lib/lrc";
 import { cn } from "@/lib/utils";
 
-export type LineState = "blank" | "upcoming" | "done" | "current";
+/** `meta` is a metadata line such as `[ar: Artist]`, which never gets a stamp. */
+export type LineState = "blank" | "meta" | "upcoming" | "done" | "current";
 
 type Props = {
   index: number;
@@ -45,6 +46,14 @@ export function LyricRow({
   onCancel,
 }: Props) {
   if (state === "blank") return <li aria-hidden className="h-3" />;
+  if (state === "meta") {
+    return (
+      <li className="flex items-center gap-2 px-2 font-mono text-xs text-white/35">
+        <span aria-hidden className="w-5 shrink-0" />
+        <span className="min-w-0 flex-1 truncate">{text}</span>
+      </li>
+    );
+  }
 
   const stamped = state === "done" || state === "current";
 
