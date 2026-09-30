@@ -15,6 +15,7 @@ import {
   X,
 } from "react-feather";
 
+import { EditFileButton } from "@/components/export/edit-file-button";
 import { FeedbackDialog } from "@/components/feedback-dialog";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -36,7 +37,7 @@ const NAV = [
   { href: "/sync", label: "Synchronize", icon: Activity },
 ] as const;
 
-/** Keeps the Help, Feedback and theme buttons on the same shape as the links. */
+/** Keeps the Edit, Help, Feedback and theme buttons on the same shape as the links. */
 const NAV_BUTTON_CLASS =
   "rounded-md text-neutral-300 hover:bg-white/10 hover:text-white dark:hover:bg-white/10";
 
@@ -70,6 +71,7 @@ export function SiteHeader() {
               </Link>
             );
           })}
+          <EditFileButton className={NAV_BUTTON_CLASS} />
           <HelpDialog />
           <FeedbackDialog className={NAV_BUTTON_CLASS} />
           <ThemeToggle

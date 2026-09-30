@@ -23,7 +23,8 @@ import { toast } from "sonner";
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { ExportPanel } from "@/components/export/export-panel";
-import { FinishDialog, type LrcFile } from "@/components/export/finish-dialog";
+import { FinishDialog } from "@/components/export/finish-dialog";
+import type { LrcFile } from "@/components/export/lrc-drop";
 import { LyricRow, type LineState } from "@/components/sync/lyric-row";
 import { ToolbarButton } from "@/components/sync/toolbar-button";
 import { VolumeControl } from "@/components/sync/volume-control";

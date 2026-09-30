@@ -69,6 +69,8 @@ highlighted, next to a live preview of the `.srt` it converts to.
 - Closing the panel keeps the edits in the lyrics, with a toast to undo them.
 - An uploaded `.lrc` stands on its own: downloads are named after it, its
   edits only go into them, and the lyrics you synced stay as they are.
+- **Edit** in the header opens the same upload on any page, so an existing
+  `.lrc` can be fixed and converted without syncing anything first.
 
 ### Keyboard
 
