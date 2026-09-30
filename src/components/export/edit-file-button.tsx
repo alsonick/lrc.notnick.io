@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Edit } from "react-feather";
+import { UploadCloud } from "react-feather";
 
 import { ExportPanel } from "@/components/export/export-panel";
 import {
@@ -44,15 +44,14 @@ export function EditFileButton({ className }: { className?: string }) {
           ref={triggerRef}
           render={<Button variant="ghost" className={className} />}
         >
-          <Edit />
-          Edit
+          <UploadCloud />
+          Upload
         </DialogTrigger>
         <DialogContent {...drop.popupProps} className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Edit an .lrc file</DialogTitle>
             <DialogDescription>
-              Fix any line or timestamp, then download it as .lrc or as .srt
-              subtitles.
+              Fix any line or timestamp, then download it as .lrc or as .srt.
             </DialogDescription>
           </DialogHeader>
           <LrcDropZone drop={drop} label="Upload an .lrc file" large />

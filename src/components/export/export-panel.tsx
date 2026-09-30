@@ -171,8 +171,7 @@ export function ExportPanel({
               Edit &amp; convert
             </SheetTitle>
             <SheetDescription>
-              Fix any line or timestamp, then download the file as .lrc or as
-              .srt subtitles.
+              Fix any line or timestamp, then download it as .lrc or as .srt.
             </SheetDescription>
           </div>
         </div>

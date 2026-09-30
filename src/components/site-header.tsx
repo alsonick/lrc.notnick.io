@@ -37,7 +37,7 @@ const NAV = [
   { href: "/sync", label: "Synchronize", icon: Activity },
 ] as const;
 
-/** Keeps the Edit, Help, Feedback and theme buttons on the same shape as the links. */
+/** Keeps the Upload, Help, Feedback and theme buttons on the same shape as the links. */
 const NAV_BUTTON_CLASS =
   "rounded-md text-neutral-300 hover:bg-white/10 hover:text-white dark:hover:bg-white/10";
 
