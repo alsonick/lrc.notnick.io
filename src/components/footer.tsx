@@ -8,13 +8,13 @@ import { social } from "@/lib/social-links";
 
 export function Footer() {
   return (
-    <footer className="mx-auto mt-5 flex w-full max-w-5xl items-center justify-between border-t border-border px-4 pt-10 pb-2">
-      <div className="flex flex-col gap-0.5 text-xs text-muted-foreground">
+    <footer className="mx-auto  mt-5 flex w-full max-w-5xl items-center justify-between border-t border-border px-4 pt-10 pb-2">
+      <div className="flex flex-col opacity-65 gap-0.5 text-xs text-muted-foreground">
         <h2 className="text-base font-bold text-neutral-600 sm:text-lg dark:text-neutral-300">
-          LRC Generator
+          {FULL_NAME}
         </h2>
         <p>
-          &copy; {new Date().getFullYear()} | {FULL_NAME} | MIT.
+          &copy; {new Date().getFullYear()} | LRC Generator | MIT.
         </p>
         <p>
           Made with{" "}
@@ -53,7 +53,7 @@ export function Footer() {
       >
         {/* Opts out of the icon hover bounce in globals.css. */}
         <GitHubIcon className="transform-none" />
-        GitHub
+        GitHub Repository
         <ExternalLink className="ml-px" strokeWidth={2.5} aria-hidden />
       </Button>
     </footer>

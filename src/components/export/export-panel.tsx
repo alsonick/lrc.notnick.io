@@ -168,7 +168,7 @@ export function ExportPanel({
           {/* Two tight lines, about as tall as the icon beside them. */}
           <div className="min-w-0 space-y-0.5">
             <SheetTitle className="text-lg leading-6 font-semibold">
-              Edit &amp; convert
+              Edit
             </SheetTitle>
             <SheetDescription>
               Fix any line or timestamp, then download it as .lrc or as .srt.

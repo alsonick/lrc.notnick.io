@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Edit3 } from "react-feather";
 import { toast } from "sonner";
 
 import { SyncSession } from "@/components/sync/sync-session";
@@ -47,16 +48,17 @@ export function Synchronizer({ initialText }: { initialText: string }) {
   if (!lines.some(isLyric)) {
     return (
       <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center px-4 py-16 text-center">
-        <h1 className="text-xl font-semibold">Nothing to synchronize yet</h1>
+        <h1 className="text-xl font-semibold">Nothing to synchronize yet.</h1>
         <p className="mt-2 max-w-md text-sm text-muted-foreground">
           Paste your lyrics in the editor first, then come back here to stamp
-          each line while the song plays.
+          each line, click the &quot;Help&quot; header link for more information.
         </p>
         <Button
           className="mt-6"
           nativeButton={false}
           render={<Link href="/" />}
         >
+          <Edit3 />
           Open the editor
         </Button>
       </div>

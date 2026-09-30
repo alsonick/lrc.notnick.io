@@ -51,7 +51,7 @@ and metadata lines such as `[ar: Artist]` are never stamped.
 Keep the `.lrc` next to the audio with the same file name and most players
 pick it up.
 
-### Edit & convert
+### Edit
 
 A panel slides in from the right with the `.lrc` as editable text, time tags
 highlighted, next to a live preview of the `.srt` it converts to.

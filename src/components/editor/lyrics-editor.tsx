@@ -41,14 +41,80 @@ import {
   useOriginalCase,
 } from "@/lib/lyrics-store";
 
-const PLACEHOLDER = `Paste your lyrics here, for example straight from Genius:
+/**
+ * Original lines laid out like a Genius copy-paste: credited section headers,
+ * asides in parentheses and the odd missing blank line, all of which the
+ * toolbar cleans up.
+ */
+const PLACEHOLDER = `[Intro: Mara Vale & Theo Lane]
+(Ooh, ooh)
 
-[Verse 1]
-I've been walking down this road
-Looking for a place to call my own
+[Verse 1: Theo Lane]
+I left the porch light on for you
+Just in case the night ran long
+Counted every passing car
+Humming half of our old song
 
-[Chorus]
-Take me home, take me home…`;
+[Pre-Chorus: Theo Lane]
+Wherever the road goes, I'll be driving
+Headlights on and still believing
+So I'll keep the engine running every night
+Every night
+
+[Chorus: Theo Lane]
+If the stars stopped shining
+I'd still find my way to you
+If the map went blank
+And every road we knew fell through
+I'd follow your voice through the dark
+Like a spark
+If the stars stopped shining
+I'd still find my way to you
+
+[Post-Chorus: Mara Vale & Theo Lane]
+(Ooh, ooh)
+[Verse 2: Mara Vale, Mara Vale & Theo Lane]
+Oh, we wrote our names on the station wall
+Back when the trains still ran on time
+Every word you said, I kept them all
+Folded in a pocket next to mine
+
+[Pre-Chorus: Mara Vale & Theo Lane]
+Wherever the road goes, I'll be driving
+Headlights on and still believing
+So I'll keep the engine running every night
+Every night
+
+[Chorus: Mara Vale & Theo Lane, Mara Vale]
+If the stars stopped shining
+I'd still find my way to you
+If the map went blank
+And every road we knew fell through
+I'd follow your voice through the dark
+Like a spark
+If the stars stopped shining
+I'd still find my way to you
+
+[Bridge: Theo Lane, Mara Vale, Both]
+Find my way to you
+Way to you
+Find my way to you
+Oh-oh
+[Chorus: Mara Vale, Mara Vale & Theo Lane, Theo Lane]
+If the stars stopped shining
+I'd still find my way to you
+If the map went blank
+And every road we knew fell through
+I'd follow your voice through the dark
+Like a spark
+If the stars stopped shining
+I'd still find my way to you
+If the stars stopped shining
+I'd still find my way to you
+
+[Outro: Mara Vale & Theo Lane]
+(Ooh, ooh)
+I'd still find my way to you`;
 
 export function LyricsEditor() {
   const text = useLyricsText();
@@ -251,7 +317,7 @@ export function LyricsEditor() {
           aria-label="Lyrics"
           // Same height as the synchronizer panel: half the viewport below
           // the header (at least 24rem), minus that page's padding and hint.
-          className="h-[calc(max((100dvh-3.5rem)/2,24rem)-3.75rem)] field-sizing-fixed sm:h-[calc(max((100dvh-3.5rem)/2,24rem)-4.75rem)] resize-none overflow-y-auto rounded-none border-0 px-5 py-4 text-base leading-relaxed shadow-none focus-visible:ring-0 disabled:bg-transparent md:text-base dark:bg-transparent dark:disabled:bg-transparent"
+          className="h-[calc(max((100dvh-3.5rem)/2,24rem)-3.75rem)] field-sizing-fixed sm:h-[calc(max((100dvh-3.5rem)/2,24rem)-4.75rem)] resize-none overflow-y-auto rounded-none border-0 px-5 py-4 text-base leading-relaxed shadow-none placeholder:text-muted-foreground/50 focus-visible:ring-0 disabled:bg-transparent md:text-base dark:bg-transparent dark:disabled:bg-transparent"
         />
 
         <div className="flex flex-wrap items-center justify-end gap-3 border-t bg-muted/40 p-3">
