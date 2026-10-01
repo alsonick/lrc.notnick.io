@@ -42,10 +42,9 @@ and metadata lines such as `[ar: Artist]` are never stamped.
 - While paused, click a line's text to edit it. Click anywhere else, or
   Continue, to keep the change; `Esc` cancels. Timestamps are kept.
 - Once every line is stamped, Next Line reads **Done**. Click it to stop and
-  choose: **Edit** opens the file for a last look (see below), **Upload an
-  .lrc file instead** (or dropping one on the dialog) opens a file of your
-  own there, and **Cancel** downloads the `.lrc` as it is. Files are named
-  after the audio file. **Save .lrc** downloads the `.lrc` again any time.
+  choose: **Edit** opens the file for a last look (see below), and **Cancel**
+  downloads the `.lrc` as it is. Files are named after the audio file.
+  **Save .lrc** downloads the `.lrc` again any time.
 - **Editor** goes back to the editor with every stamp intact.
 
 Keep the `.lrc` next to the audio with the same file name and most players
@@ -64,14 +63,18 @@ highlighted, next to a live preview of the `.srt` it converts to.
 - **Download as LRC** saves the text as it is, minus blank lines.
 - **Download as SRT** converts it. Each subtitle lasts until the next line
   starts; a timestamp on its own line, like `[01:02.00]`, ends the one before
-  it early; the last one lasts up to five seconds and never runs past the end
-  of the song. Untimed lines are left out, `[offset: …]` is applied, and a
-  line with several timestamps becomes one subtitle per timestamp.
+  it early; the last one stays up until the song ends when the audio is known
+  (loaded in the synchronizer, or added in the **Upload** dialog), and for five
+  seconds when it isn't. The length is measured by decoding the audio, which is
+  exact even for MP3s whose header only lets players estimate it. Untimed lines
+  are left out, `[offset: …]` is applied, and a line with several timestamps
+  becomes one subtitle per timestamp.
 - Closing the panel keeps the edits in the lyrics, with a toast to undo them.
-- An uploaded `.lrc` stands on its own: downloads are named after it, its
-  edits only go into them, and the lyrics you synced stay as they are.
-- **Upload** in the header opens the same upload on any page, so an existing
-  `.lrc` can be fixed and converted without syncing anything first.
+- **Upload** in the header opens an existing `.lrc` on any page, without
+  syncing anything first. The song's audio can be added there too; it's
+  optional, but recommended so the last subtitle runs until the song ends.
+  An uploaded file stands on its own: downloads are named after it, its edits
+  only go into them, and the lyrics in the editor stay as they are.
 
 ### Keyboard
 

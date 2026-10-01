@@ -3,13 +3,14 @@
  *
  * LRC only says when each line starts, so a subtitle lasts until the next
  * time in the file. A time tag with no text after it ends the line before it
- * early (handy for instrumental breaks), and the last line gets a fixed
- * length because nothing follows it.
+ * early (handy for instrumental breaks). Nothing follows the last line, so it
+ * runs to the end of the song when the song's length is known, or for a fixed
+ * few seconds when it isn't.
  */
 
 import { inspectLrcLine } from "@/lib/lrc";
 
-/** How long the last subtitle stays up, at most, since nothing follows it. */
+/** How long the last subtitle stays up when the song's length isn't known. */
 export const LAST_CUE_SECONDS = 5;
 
 export type SrtCue = {
@@ -37,8 +38,8 @@ export function formatSrtTime(seconds: number): string {
 /**
  * One cue per time tag, in time order. Untimed lines and metadata are left
  * out, `[offset: …]` is applied, and a line with several tags (a repeated
- * chorus) becomes one cue per tag. `duration`, when the song's length is
- * known, keeps the last cue from running past the end.
+ * chorus) becomes one cue per tag. `duration` is the song's length in
+ * seconds, if known: the last cue then ends with the song.
  */
 export function lrcToSrtCues(
   text: string,
@@ -68,9 +69,12 @@ export function lrcToSrtCues(
     let end: number;
     if (next < stamps.length) {
       end = stamps[next].time - offset;
+    } else if (duration !== null && duration > start) {
+      end = duration;
     } else {
+      // No length, or one that ends before this line starts (the audio is
+      // probably for another song): fall back to a fixed spell.
       end = start + LAST_CUE_SECONDS;
-      if (duration !== null && duration > start) end = Math.min(end, duration);
     }
     // Nothing to show when the offset pushes the whole line before 0:00.
     if (end <= start) return;
