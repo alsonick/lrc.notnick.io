@@ -4,10 +4,12 @@ import {
   useEffect,
   useRef,
   useState,
+  type ComponentType,
   type DragEvent as ReactDragEvent,
 } from "react";
-import { UploadCloud } from "react-feather";
+import { UploadCloud, X } from "react-feather";
 
+import { Button } from "@/components/ui/button";
 import { readTextFile, stripExtension } from "@/lib/file";
 import { cn } from "@/lib/utils";
 
@@ -19,7 +21,7 @@ export type LrcFile = {
 };
 
 /** Lyrics take a few kilobytes; anything past this was picked by mistake. */
-const MAX_FILE_BYTES = 1024 * 1024;
+const MAX_LRC_BYTES = 1024 * 1024;
 
 /**
  * Browsers repeat dragover at least every ~550ms while a file is held over
@@ -33,13 +35,13 @@ function hasFiles(event: { dataTransfer: DataTransfer | null }): boolean {
 }
 
 /** The text of an .lrc (or .txt) file, or why it can't be opened. */
-async function readLrcFile(
+export async function readLrcFile(
   file: File,
-): Promise<{ text: string } | { error: string }> {
+): Promise<LrcFile | { error: string }> {
   if (!/\.(lrc|txt)$/i.test(file.name)) {
     return { error: "That isn't an .lrc file." };
   }
-  if (file.size > MAX_FILE_BYTES) {
+  if (file.size > MAX_LRC_BYTES) {
     return { error: "That file is too big to be lyrics." };
   }
   let text: string;
@@ -50,29 +52,37 @@ async function readLrcFile(
   }
   if (text.includes("\0")) return { error: "That file isn't text." };
   if (text.trim() === "") return { error: "That file is empty." };
-  // The editor's textarea keeps \n line breaks only.
-  return { text: text.replace(/\r\n?/g, "\n") };
+  return {
+    base: stripExtension(file.name) || "lyrics",
+    // The editor's textarea keeps \n line breaks only.
+    text: text.replace(/\r\n?/g, "\n"),
+  };
+}
+
+/** What a drag over the dialog carries, as far as a page can tell mid-drag. */
+export type DragKind = "audio" | "other";
+
+function dragKind(dataTransfer: DataTransfer): DragKind {
+  const audio = [...dataTransfer.items].some(
+    (item) => item.kind === "file" && item.type.startsWith("audio/"),
+  );
+  return audio ? "audio" : "other";
 }
 
 /**
- * Lets a dialog take an .lrc file, either picked through `LrcDropZone` or
- * dropped anywhere on the dialog (spread `popupProps` on its content).
+ * Lets a dialog take a file dropped anywhere on it: spread `popupProps` on
+ * its content. `dragging` says what's held over it, so the right drop area
+ * can light up.
  */
-export function useLrcDrop(open: boolean, onFile: (file: LrcFile) => void) {
+export function useDialogDrop(open: boolean, onDrop: (file: File) => void) {
   const popupRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  /** A file is being dragged over the dialog. */
-  const [dragging, setDragging] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [dragging, setDragging] = useState<DragKind | null>(null);
 
-  // Each opening starts clean, without the last attempt's error.
+  // Each opening starts without a leftover highlight.
   const [wasOpen, setWasOpen] = useState(open);
   if (open !== wasOpen) {
     setWasOpen(open);
-    if (open) {
-      setDragging(false);
-      setError(null);
-    }
+    if (open) setDragging(null);
   }
 
   // Dropped anywhere but on the dialog, the browser would open the file in
@@ -87,17 +97,17 @@ export function useLrcDrop(open: boolean, onFile: (file: LrcFile) => void) {
       event.preventDefault();
       const inside = popupRef.current?.contains(event.target as Node) ?? false;
       event.dataTransfer.dropEffect = inside ? "copy" : "none";
-      setDragging(inside);
+      setDragging(inside ? dragKind(event.dataTransfer) : null);
       window.clearTimeout(idle);
       if (inside) {
-        idle = window.setTimeout(() => setDragging(false), DRAG_IDLE_MS);
+        idle = window.setTimeout(() => setDragging(null), DRAG_IDLE_MS);
       }
     }
     function onDrop(event: DragEvent) {
       if (!hasFiles(event)) return;
       event.preventDefault();
       window.clearTimeout(idle);
-      setDragging(false);
+      setDragging(null);
     }
     window.addEventListener("dragover", onDragOver);
     window.addEventListener("drop", onDrop);
@@ -108,49 +118,51 @@ export function useLrcDrop(open: boolean, onFile: (file: LrcFile) => void) {
     };
   }, [open]);
 
-  async function openFile(file: File | undefined) {
-    if (!file) return;
-    const result = await readLrcFile(file);
-    if ("error" in result) {
-      setError(result.error);
-      return;
-    }
-    onFile({ base: stripExtension(file.name) || "lyrics", text: result.text });
-  }
-
   return {
     dragging,
-    error,
-    inputRef,
-    openFile,
     popupProps: {
       ref: popupRef,
       onDrop(event: ReactDragEvent) {
         if (!hasFiles(event)) return;
         event.preventDefault();
-        void openFile(event.dataTransfer.files[0]);
+        const file = event.dataTransfer.files[0];
+        if (file) onDrop(file);
       },
     },
   };
 }
 
-type LrcDrop = ReturnType<typeof useLrcDrop>;
+type Icon = ComponentType<{ className?: string }>;
 
 /**
- * Where a dialog using `useLrcDrop` says it takes a file: click to pick one,
- * or drop one here (or anywhere on the dialog). `large` suits a dialog that
- * is only for picking a file.
+ * A place to click for a file or drop one on. `error` stands in for the hint
+ * until the next attempt. `large` suits the main file of a dialog.
+ *
+ * Mid-drag only the one-line `label` and colours may change. Anything that
+ * resizes the zone would shift the centred dialog under the pointer, and a
+ * drop on an element the browser hasn't cleared for dropping yet is lost.
  */
-export function LrcDropZone({
-  drop,
+export function DropZone({
   label,
+  hint,
+  error,
+  highlighted,
+  accept,
+  onFile,
+  icon: Icon = UploadCloud,
   large = false,
 }: {
-  drop: LrcDrop;
   label: string;
+  hint: string;
+  error?: string | null;
+  /** A matching file is being dragged over the dialog. */
+  highlighted: boolean;
+  accept: string;
+  onFile: (file: File) => void;
+  icon?: Icon;
   large?: boolean;
 }) {
-  const { dragging, error, inputRef, openFile } = drop;
+  const inputRef = useRef<HTMLInputElement>(null);
   return (
     <>
       {/* The text changes mid-drag, so the inner parts ignore the pointer:
@@ -159,7 +171,7 @@ export function LrcDropZone({
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        data-dragging={dragging || undefined}
+        data-dragging={highlighted || undefined}
         className={cn(
           "group flex w-full items-center gap-2.5 rounded-lg border border-dashed border-foreground/20 p-2.5 text-left transition-colors outline-none **:pointer-events-none hover:border-foreground/35 hover:bg-muted/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 data-dragging:border-primary data-dragging:bg-primary/5",
           large && "flex-col justify-center gap-3 px-4 py-8 text-center",
@@ -171,39 +183,73 @@ export function LrcDropZone({
             large && "size-10 rounded-xl",
           )}
         >
-          <UploadCloud className={large ? "size-5" : "size-4"} />
+          <Icon className={large ? "size-5" : "size-4"} />
         </span>
         <span className="min-w-0">
-          <span className="block text-sm font-medium">
-            {dragging ? "Drop to open it" : label}
-          </span>
+          <span className="block text-sm font-medium">{label}</span>
           <span
             className={cn(
               "block text-xs text-muted-foreground",
-              error && !dragging && "text-destructive",
+              error && !highlighted && "text-destructive",
             )}
           >
-            {dragging
-              ? "It opens in the editor."
-              : (error ?? "Drop it here or click to choose a file.")}
+            {error || hint}
           </span>
         </span>
       </button>
       <input
         ref={inputRef}
         type="file"
-        accept=".lrc,.txt"
+        accept={accept}
         className="hidden"
         onChange={(event) => {
           const file = event.target.files?.[0];
           // Lets the same file be picked again after an error.
           event.target.value = "";
-          void openFile(file);
+          if (file) onFile(file);
         }}
       />
       <p role="alert" className="sr-only">
         {error}
       </p>
     </>
+  );
+}
+
+/** A file already picked, in place of its drop area, with a way to drop it. */
+export function PickedFile({
+  icon: Icon,
+  name,
+  detail,
+  removeLabel,
+  onRemove,
+}: {
+  icon: Icon;
+  name: string;
+  detail: string;
+  removeLabel: string;
+  onRemove: () => void;
+}) {
+  return (
+    <div className="flex items-center gap-2.5 rounded-lg bg-background p-2.5 shadow-xs ring-1 ring-foreground/10 dark:bg-input/30">
+      <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/15 text-primary">
+        <Icon className="size-4" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-mono text-xs font-medium" title={name}>
+          {name}
+        </p>
+        <p className="truncate text-xs text-muted-foreground">{detail}</p>
+      </div>
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        onClick={onRemove}
+        aria-label={removeLabel}
+        title={removeLabel}
+      >
+        <X />
+      </Button>
+    </div>
   );
 }

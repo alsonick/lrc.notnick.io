@@ -41,6 +41,7 @@ import { downloadTextFile } from "@/lib/file";
 import {
   buildLrcFileFromText,
   findLrcIssues,
+  formatClock,
   type LrcIssue,
 } from "@/lib/lrc";
 import {
@@ -235,8 +236,10 @@ export function ExportPanel({
                   <p className="leading-relaxed">
                     Each subtitle stays up until the next line starts. A
                     timestamp on its own line, like [01:02.00], ends the one
-                    before it early. The last one lasts up to{" "}
-                    {LAST_CUE_SECONDS} seconds.
+                    before it early.{" "}
+                    {duration === null
+                      ? `The last one lasts ${LAST_CUE_SECONDS} seconds, since the song's length isn't known.`
+                      : `The last one stays up until the song ends, at ${formatClock(duration)}.`}
                   </p>
                 </TooltipContent>
               </Tooltip>

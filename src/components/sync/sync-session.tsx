@@ -24,7 +24,6 @@ import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { ExportPanel } from "@/components/export/export-panel";
 import { FinishDialog } from "@/components/export/finish-dialog";
-import type { LrcFile } from "@/components/export/lrc-drop";
 import { LyricRow, type LineState } from "@/components/sync/lyric-row";
 import { ToolbarButton } from "@/components/sync/toolbar-button";
 import { VolumeControl } from "@/components/sync/volume-control";
@@ -128,8 +127,6 @@ export function SyncSession({
   /** The question Done asks: edit and convert, or download as it is. */
   const [finishOpen, setFinishOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
-  /** An .lrc picked in the Done dialog, edited in place of the lyrics. */
-  const [upload, setUpload] = useState<LrcFile | null>(null);
   /** Next Line / Done, where focus returns once the export panel closes. */
   const nextButtonRef = useRef<HTMLButtonElement>(null);
   /** Index of the line whose text is being edited inline, if any. */
@@ -396,9 +393,7 @@ export function SyncSession({
     toast.success(`All lines synchronized. Downloaded ${filename}.`);
   }
 
-  /** Opens the export panel on the lyrics, or on a file picked instead. */
-  function openExport(file: LrcFile | null) {
-    setUpload(file);
+  function openExport() {
     setFinishOpen(false);
     setExportOpen(true);
   }
@@ -678,19 +673,18 @@ export function SyncSession({
         fileBase={fileBase}
         lineCount={syncable.length}
         onDownload={downloadAsIs}
-        onEdit={() => openExport(null)}
-        onUpload={openExport}
+        onEdit={openExport}
       />
 
-      {/* An uploaded file stands on its own: its edits only go into its
-          downloads, and the song loaded here may not be the one it's for. */}
+      {/* With audio loaded, the last subtitle runs to the end of the song; the
+          player's own figure stands in until the exact length is measured. */}
       <ExportPanel
         open={exportOpen}
         onOpenChange={setExportOpen}
-        text={upload ? upload.text : serializeLyrics(lines)}
-        fileBase={upload ? upload.base : fileBase}
-        duration={upload ? null : clock.duration}
-        onApply={upload ? undefined : applyEdits}
+        text={serializeLyrics(lines)}
+        fileBase={fileBase}
+        duration={audio ? (audio.duration ?? clock.duration) : null}
+        onApply={applyEdits}
         finalFocus={nextButtonRef}
       />
     </div>

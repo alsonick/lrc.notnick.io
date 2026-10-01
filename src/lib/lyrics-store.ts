@@ -8,6 +8,8 @@
 
 import { useSyncExternalStore } from "react";
 
+import { measureAudioDuration } from "@/lib/audio";
+
 type Listener = () => void;
 const listeners = new Set<Listener>();
 
@@ -79,6 +81,8 @@ export type AudioSource = {
   /** Object URL for the file. Revoked when the file is replaced. */
   url: string;
   name: string;
+  /** Exact length in seconds, once measured; null until then or if unreadable. */
+  duration: number | null;
 };
 
 let audioSource: AudioSource | null = null;
@@ -86,9 +90,16 @@ let audioSource: AudioSource | null = null;
 export function setAudioFile(file: File | null) {
   if (audioSource) URL.revokeObjectURL(audioSource.url);
   audioSource = file
-    ? { file, url: URL.createObjectURL(file), name: file.name }
+    ? { file, url: URL.createObjectURL(file), name: file.name, duration: null }
     : null;
   emit();
+  if (!file) return;
+  void measureAudioDuration(file).then((duration) => {
+    // A newer file may have replaced this one while it was being measured.
+    if (audioSource?.file !== file || duration === null) return;
+    audioSource = { ...audioSource, duration };
+    emit();
+  });
 }
 
 export function useAudioSource(): AudioSource | null {
