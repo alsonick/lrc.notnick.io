@@ -2,39 +2,59 @@
 
 import {
   memo,
+  useEffect,
   useImperativeHandle,
   useMemo,
   useRef,
   type Ref,
 } from "react";
 
-import {
-  tokenizeLrcLine,
-  type LrcIssue,
-  type LrcToken,
-} from "@/lib/lrc";
 import { cn } from "@/lib/utils";
 
-export type LrcCodeEditorHandle = {
+/** A run of characters in a line and how to colour it. */
+export type CodeToken = { text: string; className?: string };
+
+/**
+ * Colours one line. `kind` and `issue` are the line's entries in `kinds` and
+ * `issues`. The tokens must join back into exactly the line, and only colour
+ * and decoration may vary, or the two layers drift apart.
+ */
+export type Tokenize = (
+  line: string,
+  kind: string | undefined,
+  issue: string | undefined,
+) => CodeToken[];
+
+export type CodeEditorHandle = {
   textarea: HTMLTextAreaElement | null;
   /** Puts the caret at the start of a line and scrolls it to the middle. */
   revealLine: (line: number) => void;
   /**
-   * Swaps in new text as a single edit the textarea can undo, keeping the
-   * caret on the same line and the view where it was.
+   * Swaps in new text as a single edit the textarea can undo. The caret stays
+   * on its line and the view where it was, unless `caretLine` moves both.
    */
-  replaceText: (text: string) => void;
+  replaceText: (text: string, caretLine?: number) => void;
 };
 
 type Props = {
-  ref?: Ref<LrcCodeEditorHandle>;
+  ref?: Ref<CodeEditorHandle>;
   value: string;
   onChange: (value: string) => void;
+  /** Must keep its identity between renders, or every line re-renders. */
+  tokenize: Tokenize;
+  /** What each line is, by index, for `tokenize`. */
+  kinds?: readonly string[];
   /** Lines to flag, by index. */
-  issues: ReadonlyMap<number, LrcIssue["kind"]>;
-  /** The line with the caret, which gets a highlight. */
+  issues: ReadonlyMap<number, string>;
+  /** The line with the caret, which gets a highlight. -1 for none. */
   activeLine: number;
   onActiveLineChange: (line: number) => void;
+  /**
+   * Lines tinted to show what a neighbouring editor's caret is on. They are
+   * scrolled into view whenever they change.
+   */
+  linked?: { from: number; to: number } | null;
+  onFocus?: () => void;
   placeholder?: string;
   "aria-label"?: string;
 };
@@ -46,17 +66,6 @@ type Props = {
  */
 const TEXT_CLASS =
   "font-mono text-sm leading-6 whitespace-pre-wrap wrap-break-word [font-kerning:none] [font-variant-ligatures:none]";
-
-const TOKEN_CLASS: Record<LrcToken["kind"], string | undefined> = {
-  text: undefined,
-  bracket: "text-muted-foreground/70",
-  time: "text-green-700 dark:text-primary",
-  word: "text-green-700/70 dark:text-primary/70",
-  meta: "text-sky-700 dark:text-sky-400",
-};
-
-const SQUIGGLE =
-  "underline decoration-amber-500 decoration-wavy decoration-1 underline-offset-[5px]";
 
 /** Index of the line that `offset` falls on. */
 function lineAt(text: string, offset: number): number {
@@ -81,24 +90,56 @@ function offsetOfLine(text: string, line: number): number {
 }
 
 /**
- * A plain textarea with LRC syntax highlighting, line numbers and markers
- * for lines that need a look. The textarea's own text is transparent and sits
+ * Scrolls `scroller` so the rows `from`..`to` sit in the middle, unless they
+ * are already in full view. It moves the box itself; scrollIntoView could
+ * move the page behind too.
+ */
+function showRows(scroller: HTMLElement, from: number, to: number, always = false) {
+  const first = scroller.querySelector<HTMLElement>(`[data-line="${from}"]`);
+  const last = scroller.querySelector<HTMLElement>(`[data-line="${to}"]`);
+  if (!first || !last) return;
+  const base = scroller.getBoundingClientRect().top - scroller.scrollTop;
+  const top = first.getBoundingClientRect().top - base;
+  const bottom = last.getBoundingClientRect().bottom - base;
+  const visible =
+    top >= scroller.scrollTop &&
+    bottom <= scroller.scrollTop + scroller.clientHeight;
+  if (visible && !always) return;
+  const centred = (top + bottom) / 2 - scroller.clientHeight / 2;
+  scroller.scrollTo({ top: Math.max(0, centred), behavior: "smooth" });
+}
+
+/**
+ * A plain textarea with syntax highlighting, line numbers and markers for
+ * lines that need a look. The textarea's own text is transparent and sits
  * over a coloured copy in a one-cell grid, so typing, selection, undo and IME
  * all stay native. The copy sets the height and the outer box scrolls both.
  */
-export function LrcCodeEditor({
+export function CodeEditor({
   ref,
   value,
   onChange,
+  tokenize,
+  kinds,
   issues,
   activeLine,
   onActiveLineChange,
+  linked = null,
+  onFocus,
   placeholder,
   "aria-label": ariaLabel,
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lines = useMemo(() => value.split("\n"), [value]);
+  const linkedFrom = linked?.from;
+  const linkedTo = linked?.to;
+
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    if (!scroller || linkedFrom === undefined || linkedTo === undefined) return;
+    showRows(scroller, linkedFrom, linkedTo);
+  }, [linkedFrom, linkedTo]);
 
   useImperativeHandle(
     ref,
@@ -115,33 +156,30 @@ export function LrcCodeEditor({
         textarea.focus({ preventScroll: true });
         textarea.setSelectionRange(caret, caret);
         onActiveLineChange(target);
-        const row = scroller.querySelector<HTMLElement>(
-          `[data-line="${target}"]`,
-        );
-        if (!row) return;
-        const top =
-          row.getBoundingClientRect().top -
-          scroller.getBoundingClientRect().top +
-          scroller.scrollTop;
-        const centred = top - scroller.clientHeight / 2 + row.offsetHeight / 2;
-        scroller.scrollTo({ top: Math.max(0, centred), behavior: "smooth" });
+        showRows(scroller, target, target, true);
       },
-      replaceText(text) {
+      replaceText(text, caretLine) {
         const textarea = textareaRef.current;
         const scroller = scrollRef.current;
         if (!textarea || !scroller) return;
         const { scrollTop } = scroller;
-        const line = lineAt(textarea.value, textarea.selectionStart);
+        const line =
+          caretLine ?? lineAt(textarea.value, textarea.selectionStart);
         textarea.focus({ preventScroll: true });
         textarea.select();
         // Setting the value would wipe the textarea's undo history;
         // execCommand records the swap there, so Cmd+Z brings the edits back.
         if (!document.execCommand("insertText", false, text)) onChange(text);
         const caret = offsetOfLine(text, line);
+        const target = lineAt(text, caret);
         textarea.setSelectionRange(caret, caret);
-        onActiveLineChange(lineAt(text, caret));
+        onActiveLineChange(target);
         // The browser scrolls to wherever the insert ended; stay put instead.
         scroller.scrollTop = scrollTop;
+        if (caretLine !== undefined) {
+          // The rows only match the new text after the next render.
+          requestAnimationFrame(() => showRows(scroller, target, target));
+        }
       },
     }),
     [onActiveLineChange, onChange],
@@ -177,8 +215,13 @@ export function LrcCodeEditor({
               key={index}
               index={index}
               text={line}
-              active={index === activeLine}
+              kind={kinds?.[index]}
               issue={issues.get(index)}
+              active={index === activeLine}
+              linked={
+                linked !== null && index >= linked.from && index <= linked.to
+              }
+              tokenize={tokenize}
             />
           ))}
         </div>
@@ -190,6 +233,7 @@ export function LrcCodeEditor({
             trackCaret(event.target);
           }}
           onSelect={(event) => trackCaret(event.currentTarget)}
+          onFocus={onFocus}
           placeholder={placeholder}
           aria-label={ariaLabel}
           spellCheck={false}
@@ -213,16 +257,29 @@ export function LrcCodeEditor({
 const EditorRow = memo(function EditorRow({
   index,
   text,
-  active,
+  kind,
   issue,
+  active,
+  linked,
+  tokenize,
 }: {
   index: number;
   text: string;
+  kind: string | undefined;
+  issue: string | undefined;
   active: boolean;
-  issue: LrcIssue["kind"] | undefined;
+  linked: boolean;
+  tokenize: Tokenize;
 }) {
   return (
-    <div data-line={index} className={cn("flex", active && "bg-foreground/5")}>
+    <div
+      data-line={index}
+      className={cn(
+        "flex",
+        active && "bg-foreground/5",
+        linked && "bg-primary/10",
+      )}
+    >
       <span
         className={cn(
           "relative w-12 shrink-0 pr-3 text-right font-mono text-xs leading-6 text-muted-foreground/60 tabular-nums",
@@ -239,19 +296,9 @@ const EditorRow = memo(function EditorRow({
       <span className={cn(TEXT_CLASS, "min-w-0 flex-1 pr-4 pl-3")}>
         {text === ""
           ? // Keeps an empty line one line tall, like the textarea shows it.
-            "​"
-          : tokenizeLrcLine(text).map((token, i) => (
-              <span
-                key={i}
-                className={cn(
-                  TOKEN_CLASS[token.kind],
-                  issue === "order" && token.kind === "time" && SQUIGGLE,
-                  issue === "order" &&
-                    token.kind === "time" &&
-                    "text-amber-600 dark:text-amber-400",
-                  issue === "untimed" && token.kind === "text" && SQUIGGLE,
-                )}
-              >
+            "\u200b"
+          : tokenize(text, kind, issue).map((token, i) => (
+              <span key={i} className={token.className}>
                 {token.text}
               </span>
             ))}

@@ -52,16 +52,26 @@ pick it up.
 
 ### Edit
 
-A panel slides in from the right with the `.lrc` as editable text, time tags
-highlighted, next to a live preview of the `.srt` it converts to.
+A panel slides in from the right with the `.lrc` and the `.srt` it converts to
+side by side, both as editable text with their time tags highlighted.
 
 - Lines without a timestamp, and timestamps earlier than the line above, are
   marked. The footer explains the one under the caret and **Next** / **Show**
-  walks through the rest.
-- Click a subtitle in the preview to jump to its line. **Revert** undoes every
-  edit made since the panel opened (and `Cmd/Ctrl+Z` undoes the revert).
+  walks through the rest, for whichever side you're working in.
+- The caret on one side tints the matching lines on the other. **Revert**
+  undoes every edit made to the `.lrc` since the panel opened (and
+  `Cmd/Ctrl+Z` undoes the revert).
+- The subtitles follow the `.lrc` until you edit them. From then on they are
+  their own text: press Enter for a second row in a subtitle, change its
+  times, or **Add** a new one after the caret (it starts where that one ends,
+  or shares its time when the next follows with no gap). Changes to the `.lrc`
+  no longer reach them until **Revert** on that side rebuilds them from it.
+- Blocks that can't become a subtitle (an unreadable time range, an end before
+  the start, no text, text without a time range) are marked and left out.
 - **Download as LRC** saves the text as it is, minus blank lines.
-- **Download as SRT** converts it. Each subtitle lasts until the next line
+- **Download as SRT** saves the subtitles, numbered afresh. Hand edits to them
+  live only in the panel, so closing before downloading them asks first.
+- When converting from the `.lrc`, each subtitle lasts until the next line
   starts; a timestamp on its own line, like `[01:02.00]`, ends the one before
   it early; the last one stays up until the song ends when the audio is known
   (loaded in the synchronizer, or added in the **Upload** dialog), and for five
