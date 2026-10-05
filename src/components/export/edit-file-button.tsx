@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { isAudioFile, measureAudioDuration } from "@/lib/audio";
 import { countSyncable, formatClock, parseLyrics } from "@/lib/lrc";
+import { reportDownload } from "@/lib/report-download";
 
 type PickedLrc = LrcFile & { name: string; lines: number };
 /** `duration` is null while the file is being measured. */
@@ -201,6 +202,9 @@ export function EditFileButton({ className }: { className?: string }) {
         text={lrc?.text ?? ""}
         fileBase={lrc?.base ?? "lyrics"}
         duration={audio?.duration ?? null}
+        onDownload={(file) =>
+          reportDownload({ ...file, source: "upload", audio })
+        }
         finalFocus={triggerRef}
       />
     </>

@@ -138,7 +138,7 @@
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
-/* Theme switching (see theme-toggle.tsx). The new theme is revealed by a
+/* Theme switching (see theme-picker.tsx). The new theme is revealed by a
    circle growing out of the pointer, so both snapshots stay fully opaque and
    only the clip-path animation shows. */
 ::view-transition-old(root),
@@ -176,9 +176,22 @@
     transform 350ms ease !important;
 }
 
+/* Safari leaves backdrop-filter out of the picture it takes of the old theme,
+   so the blur behind an open dialog would drop out while the circle grows.
+   For the length of the reveal the page is blurred itself instead, which
+   every browser captures (`--blur-xs` is what `backdrop-blur-xs` uses). */
+.theme-revealing :is([data-slot="dialog-overlay"], [data-slot="sheet-overlay"]) {
+  backdrop-filter: none;
+  transition: none !important;
+}
+.theme-revealing:has([data-slot="dialog-overlay"], [data-slot="sheet-overlay"])
+  .app-shell {
+  filter: blur(var(--blur-xs));
+}
+
 /* Icons spring up a little while they, or the control they sit in, are
    hovered, and spring back once the pointer leaves. Kept in the base layer so
-   an icon with its own transition utilities (see theme-toggle.tsx) wins. */
+   an icon with its own transition utilities (see theme-picker.tsx) wins. */
 :root {
   /* A damped spring: overshoots its target by about 20%, then settles. */
   --ease-spring: linear(0, 0.036 2.3%, 0.153 5%, 0.299 7.4%, 0.763 14.2%, 0.982 18.2%, 1.121 22%, 1.192 25.9%, 1.205 28.7%, 1.191 31.9%, 1.014 45.8%, 0.962 53.9%, 0.961 60.5%, 1.007 81%, 1);

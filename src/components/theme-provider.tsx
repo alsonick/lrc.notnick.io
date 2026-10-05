@@ -3,6 +3,8 @@
 import type { ComponentProps } from "react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 
+import { THEME_KEY } from "@/lib/settings";
+
 /** Light / dark / system, persisted like the app's other settings. */
 export function ThemeProvider(
   props: ComponentProps<typeof NextThemesProvider>,
@@ -12,7 +14,7 @@ export function ThemeProvider(
       attribute="class"
       defaultTheme="system"
       enableSystem
-      storageKey="lrc.notnick.io:theme"
+      storageKey={THEME_KEY}
       {...props}
     />
   );

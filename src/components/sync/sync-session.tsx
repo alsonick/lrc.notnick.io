@@ -54,6 +54,7 @@ import {
   type LyricLine,
 } from "@/lib/lrc";
 import type { AudioSource } from "@/lib/lyrics-store";
+import { reportDownload } from "@/lib/report-download";
 import { cn } from "@/lib/utils";
 
 /** How far playback rewinds before a line when that line is undone. */
@@ -183,14 +184,35 @@ export function SyncSession({
   /** Name for every file saved from this session, taken from the audio. */
   const fileBase = stripExtension(audio?.name ?? "lyrics") || "lyrics";
 
+  /**
+   * The song for the export panel and the download log. With audio loaded,
+   * the last subtitle runs to its end; the player's own figure stands in
+   * until the exact length is measured.
+   */
+  const song = useMemo(
+    () =>
+      audio && {
+        name: audio.name,
+        duration: audio.duration ?? clock.duration,
+      },
+    [audio, clock.duration],
+  );
+
   /** Downloads the given lines as an .lrc file and returns the file name. */
   const saveLines = useCallback(
     (target: LyricLine[]) => {
       const filename = `${fileBase}.lrc`;
       downloadTextFile(filename, buildLrcFile(target));
+      reportDownload({
+        format: "lrc",
+        filename,
+        lines: target.filter(isLyric).length,
+        source: "sync",
+        audio: song,
+      });
       return filename;
     },
-    [fileBase],
+    [fileBase, song],
   );
 
   /** Stops the clock and asks what to do with the finished file. */
@@ -676,15 +698,16 @@ export function SyncSession({
         onEdit={openExport}
       />
 
-      {/* With audio loaded, the last subtitle runs to the end of the song; the
-          player's own figure stands in until the exact length is measured. */}
       <ExportPanel
         open={exportOpen}
         onOpenChange={setExportOpen}
         text={serializeLyrics(lines)}
         fileBase={fileBase}
-        duration={audio ? (audio.duration ?? clock.duration) : null}
+        duration={song?.duration ?? null}
         onApply={applyEdits}
+        onDownload={(file) =>
+          reportDownload({ ...file, source: "sync", audio: song })
+        }
         finalFocus={nextButtonRef}
       />
     </div>
