@@ -156,8 +156,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
         <ThemeProvider>
           <TooltipProvider>
-            {/* The app is desktop-only: hidden below `sm`, where MobileNotice shows instead. */}
-            <div className="hidden flex-1 flex-col sm:flex">
+            {/* The app is desktop-only: hidden below `sm`, where MobileNotice shows instead.
+                `app-shell` is how globals.css finds the page behind a dialog. */}
+            <div className="app-shell hidden flex-1 flex-col sm:flex">
               <SiteHeader />
               <main className="flex flex-1 flex-col">{children}</main>
               <Footer />

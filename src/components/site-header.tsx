@@ -18,7 +18,7 @@ import {
 import { EditFileButton } from "@/components/export/edit-file-button";
 import { FeedbackDialog } from "@/components/feedback-dialog";
 import { Logo } from "@/components/logo";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { SettingsDialog } from "@/components/settings-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -37,7 +37,7 @@ const NAV = [
   { href: "/sync", label: "Synchronize", icon: Activity },
 ] as const;
 
-/** Keeps the Upload, Help, Feedback and theme buttons on the same shape as the links. */
+/** Keeps the Upload, Help, Feedback and settings buttons on the same shape as the links. */
 const NAV_BUTTON_CLASS =
   "rounded-md text-neutral-300 hover:bg-white/10 hover:text-white dark:hover:bg-white/10";
 
@@ -45,7 +45,9 @@ export function SiteHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-neutral-900 text-white">
+    // While a theme switch blurs the page (see globals.css) the bar's colour
+    // carries on past the screen's edges, or the blur would fade them out.
+    <header className="sticky top-0 z-40 border-b border-white/10 bg-neutral-900 text-white in-[.theme-revealing]:shadow-[0_-1rem_0_1rem_var(--color-neutral-900)]">
       <div className="mx-auto flex h-14 w-full max-w-5xl items-center gap-3 px-4 sm:gap-4">
         <Link
           href="/"
@@ -74,7 +76,7 @@ export function SiteHeader() {
           <EditFileButton className={NAV_BUTTON_CLASS} />
           <HelpDialog />
           <FeedbackDialog className={NAV_BUTTON_CLASS} />
-          <ThemeToggle
+          <SettingsDialog
             className={cn(
               NAV_BUTTON_CLASS,
               "aria-expanded:bg-white/15 aria-expanded:text-white",

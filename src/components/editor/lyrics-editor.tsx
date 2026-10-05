@@ -40,6 +40,7 @@ import {
   useLyricsText,
   useOriginalCase,
 } from "@/lib/lyrics-store";
+import { reportDownload } from "@/lib/report-download";
 
 /**
  * Original lines laid out like a Genius copy-paste: credited section headers,
@@ -191,6 +192,13 @@ export function LyricsEditor() {
   function download() {
     const base = stripExtension(audio?.name ?? "lyrics") || "lyrics";
     downloadTextFile(`${base}.lrc`, buildLrcFile(parseLyrics(text)));
+    reportDownload({
+      format: "lrc",
+      filename: `${base}.lrc`,
+      lines: stats.lines,
+      source: "editor",
+      audio,
+    });
     toast.success(`Saved ${base}.lrc`);
   }
 

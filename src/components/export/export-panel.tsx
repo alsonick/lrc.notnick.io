@@ -43,8 +43,10 @@ import {
 import { downloadTextFile } from "@/lib/file";
 import {
   buildLrcFileFromText,
+  countSyncable,
   findLrcIssues,
   formatClock,
+  parseLyrics,
   type LrcIssue,
 } from "@/lib/lrc";
 import {
@@ -57,6 +59,14 @@ import {
 } from "@/lib/srt";
 
 type Format = "lrc" | "srt";
+
+/** `lines` counts lyric lines or subtitles; `edited` is whether the panel changed them. */
+export type SavedFile = {
+  format: Format;
+  filename: string;
+  lines: number;
+  edited: boolean;
+};
 
 /** How long a download button shows its check mark. */
 const SAVED_MS = 2000;
@@ -76,6 +86,8 @@ type Props = {
   duration: number | null;
   /** Receives the edited text as the panel closes, for edits that outlive it. */
   onApply?: (text: string) => void;
+  /** Called after each file is saved, with what went into it. */
+  onDownload?: (file: SavedFile) => void;
   /** Where focus goes when the panel closes. */
   finalFocus?: RefObject<HTMLElement | null>;
 };
@@ -119,6 +131,7 @@ export function ExportPanel({
   fileBase,
   duration,
   onApply,
+  onDownload,
   finalFocus,
 }: Props) {
   const lrcRef = useRef<CodeEditorHandle>(null);
@@ -251,6 +264,15 @@ export function ExportPanel({
     }
     setSaved(format);
     setAnnouncement(`Downloaded ${filename}`);
+    onDownload?.({
+      format,
+      filename,
+      lines:
+        format === "lrc"
+          ? countSyncable(parseLyrics(draft))
+          : srt.cues.length,
+      edited: edited || (format === "srt" && !following),
+    });
   }
 
   /** Typing the subtitles back to what the LRC gives picks the link up again. */

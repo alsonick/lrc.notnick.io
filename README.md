@@ -6,7 +6,9 @@ Live at [lrc.notnick.io](https://lrc.notnick.io).
 
 Everything runs client-side. Lyrics are kept in memory only, so closing or
 reloading the site starts with a blank editor. The audio file stays in memory
-too and is never uploaded.
+too and is never uploaded. The one thing that leaves the browser is a short
+log entry each time a file is downloaded, which anyone can switch off (see
+[Settings](#settings)).
 
 ## Editor
 
@@ -115,6 +117,31 @@ I've been walking down this road
 Looking for a place to call my own
 ```
 
+## Settings
+
+The gear in the header opens the settings, which apply as they're changed and
+are saved in the browser. **Done** confirms with a toast when any were changed.
+
+- **Theme**: light, dark, or whatever the device is set to.
+- **Log**: the download log, on until it's switched off. While it's on, every
+  download of an `.lrc` or `.srt` reports:
+  - which of the two was saved, and how many of each so far in this visit;
+  - the saved file's name, how many lyric lines or subtitles it holds, and
+    whether it was changed in the Edit panel first;
+  - where the lyrics came from: synced in the app, saved from the editor, or
+    an uploaded `.lrc`;
+  - the audio file's name and length, if one was loaded (that is what lets the
+    last subtitle end with the song);
+  - the theme;
+  - how long the page had been open;
+  - the browser (its user agent, as feedback also sends), its language, and
+    the host name of the site that linked here, if any.
+
+  The lyrics and the audio themselves are never sent. The switch's hint links
+  to `/privacy`, which is a placeholder until the policy is written. Anything
+  else that logs from the browser should check `isLoggingEnabled()` in
+  `src/lib/settings.ts` first, as `src/lib/report-download.ts` does.
+
 ## Running locally
 
 ```bash
@@ -130,10 +157,14 @@ The **Feedback** button in the header posts to a Discord webhook. Copy
 Settings > Integrations > Webhooks > New Webhook). Without it the form shows
 "Feedback isn't set up on this server yet."
 
+The download log (see [Settings](#settings)) posts to a webhook of its own:
+set `LOGGING` the same way, ideally to a different channel. Without it nothing
+is logged.
+
 ## Stack
 
 Next.js 16 (App Router), React 19, Tailwind CSS 4, shadcn/ui on Base UI,
 next-themes, sonner and lucide. LRC parsing lives in `src/lib/lrc.ts`, SRT
 conversion in `src/lib/srt.ts`, the shared lyrics store in
-`src/lib/lyrics-store.ts`, and the audio / stopwatch clock in
-`src/hooks/use-clock.ts`.
+`src/lib/lyrics-store.ts`, the audio / stopwatch clock in
+`src/hooks/use-clock.ts`, and the download log in `src/lib/session-log.ts`.
