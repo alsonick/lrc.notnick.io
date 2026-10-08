@@ -13,6 +13,7 @@ import {
   Music,
   Play,
   X,
+  type Icon,
 } from "react-feather";
 
 import { EditFileButton } from "@/components/export/edit-file-button";
@@ -42,8 +43,6 @@ const NAV_BUTTON_CLASS =
   "rounded-md text-neutral-300 hover:bg-white/10 hover:text-white dark:hover:bg-white/10";
 
 export function SiteHeader() {
-  const pathname = usePathname();
-
   return (
     // While a theme switch blurs the page (see globals.css) the bar's colour
     // carries on past the screen's edges, or the blur would fade them out.
@@ -57,22 +56,9 @@ export function SiteHeader() {
           <Logo className="size-7" />
         </Link>
         <nav className="ml-auto flex items-center gap-0.5 sm:gap-1">
-          {NAV.map((item) => {
-            const active = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-neutral-300 transition-colors hover:bg-white/10 hover:text-white sm:px-3 [&_svg]:size-4 [&_svg]:shrink-0",
-                  active && "bg-primary/15 text-primary hover:text-primary",
-                )}
-              >
-                <item.icon aria-hidden />
-                {item.label}
-              </Link>
-            );
-          })}
+          {NAV.map((item) => (
+            <NavLink key={item.href} {...item} />
+          ))}
           <EditFileButton className={NAV_BUTTON_CLASS} />
           <HelpDialog />
           <FeedbackDialog className={NAV_BUTTON_CLASS} />
@@ -85,6 +71,33 @@ export function SiteHeader() {
         </nav>
       </div>
     </header>
+  );
+}
+
+/** A link to one of the site's pages, tinted while that page is open. */
+function NavLink({
+  href,
+  label,
+  icon: LinkIcon,
+}: {
+  href: string;
+  label: string;
+  icon: Icon;
+}) {
+  const active = usePathname() === href;
+
+  return (
+    <Link
+      href={href}
+      aria-current={active ? "page" : undefined}
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-neutral-300 transition-colors hover:bg-white/10 hover:text-white sm:px-3 [&_svg]:size-4 [&_svg]:shrink-0",
+        active && "bg-primary/15 text-primary hover:text-primary",
+      )}
+    >
+      <LinkIcon aria-hidden />
+      {label}
+    </Link>
   );
 }
 

@@ -23,8 +23,17 @@ import { CONTACT_MAX_LENGTH, FEEDBACK_MAX_LENGTH } from "@/lib/feedback";
 
 const FAILED = "Couldn't send your feedback. Try again later.";
 
-/** Nav button that opens a small form; submissions go to `/api/feedback`. */
-export function FeedbackDialog({ className }: { className?: string }) {
+/**
+ * Nav button that opens a small form; submissions go to `/api/feedback`.
+ * `plain` makes the trigger bare text, for the footer's list of links.
+ */
+export function FeedbackDialog({
+  className,
+  plain = false,
+}: {
+  className?: string;
+  plain?: boolean;
+}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
@@ -70,12 +79,16 @@ export function FeedbackDialog({ className }: { className?: string }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        render={<Button variant="ghost" className={className} />}
-      >
-        <MessageSquare />
-        Feedback
-      </DialogTrigger>
+      {plain ? (
+        <DialogTrigger className={className}>Feedback</DialogTrigger>
+      ) : (
+        <DialogTrigger
+          render={<Button variant="ghost" className={className} />}
+        >
+          <MessageSquare />
+          Feedback
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-md">
         <form onSubmit={submit} className="contents">
           <DialogHeader>
