@@ -4,4 +4,6 @@ export const social = {
     link: "https://github.com/alsonick/lrc.notnick.io",
     title: "Source code on GitHub",
   },
+  x: { link: "https://x.com/heynickn", title: "X (Twitter)" },
+  email: { link: "mailto:hi@notnick.io", title: "Email" },
 } as const;

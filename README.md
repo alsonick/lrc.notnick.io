@@ -137,10 +137,13 @@ are saved in the browser. **Done** confirms with a toast when any were changed.
   - the browser (its user agent, as feedback also sends), its language, and
     the host name of the site that linked here, if any.
 
-  The lyrics and the audio themselves are never sent. The switch's hint links
-  to `/privacy`, which is a placeholder until the policy is written. Anything
-  else that logs from the browser should check `isLoggingEnabled()` in
-  `src/lib/settings.ts` first, as `src/lib/report-download.ts` does.
+  The lyrics and the audio themselves are never sent. Anything else that logs
+  from the browser should check `isLoggingEnabled()` in `src/lib/settings.ts`
+  first, as `src/lib/report-download.ts` does.
+
+**Privacy Policy** in the footer, and the link in the Log switch's hint, open
+the privacy policy at `/privacy`. It summarises what the log sends, so update
+`src/app/privacy/page.tsx` (and its dates) whenever that changes.
 
 ## Running locally
 

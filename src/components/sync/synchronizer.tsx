@@ -49,12 +49,8 @@ export function Synchronizer({ initialText }: { initialText: string }) {
     return (
       <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center px-4 py-16 text-center">
         <h1 className="text-xl font-semibold">Nothing to synchronize yet.</h1>
-        <p className="mt-2 max-w-md text-sm text-muted-foreground">
-          Paste your lyrics in the editor first, then come back here to stamp
-          each line, click the &quot;Help&quot; header link for more information.
-        </p>
         <Button
-          className="mt-6"
+          className="mt-3"
           nativeButton={false}
           render={<Link href="/" />}
         >
