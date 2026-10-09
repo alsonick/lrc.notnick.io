@@ -87,17 +87,11 @@ begins. That line gets the current time and the next one moves up.
 
 A few things make this less fiddly than it sounds:
 
-- No audio file? START runs a stopwatch instead, so you can sync against
-  music playing in another app.
-- A countdown of 3, 5 or 10 seconds, with a beep each second, gives you time
-  to get your hands back on the keyboard.
-- If you always press a little late, the dropdown beside **Next Line** shifts
-  every stamp earlier, by anything up to three seconds.
-- Got one wrong? Pause, then click the dot in front of a stamped line. That
-  line and everything after it are cleared, and playback goes back to two
-  seconds before it so you can go again.
-- Spotted a typo? While paused, click the line's text to fix it. The
-  timestamp stays.
+- No audio file? START runs a stopwatch for music playing elsewhere.
+- A countdown of 3, 5 or 10 seconds beeps before playback starts.
+- Press late? The dropdown beside **Next Line** shifts stamps earlier.
+- Got one wrong? Pause and click its dot to redo from that line.
+- Spotted a typo? Pause, click the line's text and fix it in place.
 
 | Key | Action |
 | --- | --- |
