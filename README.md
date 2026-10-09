@@ -36,7 +36,7 @@ apps read to show lyrics in time with a song.
 
 You paste the lyrics, play the track, and press a key as each line starts.
 At the end you get the `.lrc`, and the same timings as `.srt` subtitles if you
-want them. There is nothing to install and no account to make.
+want them.
 
 <p align="center">
   <picture>
@@ -71,13 +71,10 @@ Lyrics copied from Genius, or most other sites, arrive with section headers,
 ad-libs in brackets and a few stray lines from the page. The editor's toolbar
 gets rid of them:
 
-- **Strip sections** removes `[Verse 1]`, `[Chorus]` and other headers, along
-  with the leftovers Genius adds when you copy.
-- **Strip tags** removes existing `[mm:ss.xx]` time tags and metadata lines.
-- **Strip ()** removes asides such as `(Let's go)`, and drops any line that
-  was nothing but one.
-- **lowercase** and **UPPERCASE** change the case. **Original** puts it back
-  the way you pasted it.
+- **Strip sections** removes `[Verse 1]`, `[Chorus]` and other headers.
+- **Strip tags** removes `[mm:ss.xx]` time tags and metadata lines.
+- **Strip ()** removes asides in parentheses, such as `(Let's go)`.
+- **lowercase** and **UPPERCASE** change the case. **Original** puts it back.
 
 Each of these shows a toast with an Undo button, so nothing is a one-way
 trip. Pasting a file that is already timed works too. Its timestamps are
@@ -140,14 +137,13 @@ them asks first.
 ### How an .lrc becomes an .srt
 
 - Each subtitle stays up until the next line starts.
-- A timestamp on a line of its own, like `[01:02.00]`, ends the one before it
-  early. That is how you leave a gap for an instrumental.
-- The last subtitle runs until the song ends when the app knows the audio,
-  and for five seconds when it doesn't.
-- The song's length is measured by decoding the audio. That is exact even for
-  MP3s whose header only lets a player estimate it.
-- Lines without a timestamp are left out, `[offset: …]` is applied, and a
-  line with several timestamps becomes one subtitle for each.
+- A timestamp on its own line, like `[01:02.00]`, ends the one before it
+  early.
+- The last subtitle runs until the song ends, or for five seconds without
+  audio.
+- The song's length is measured by decoding the audio, so it is exact.
+- Lines without a timestamp are left out, and `[offset: …]` is applied.
+- A line with several timestamps becomes one subtitle for each.
 
 ## Bring a file you already have
 
@@ -192,14 +188,14 @@ small routes that forward feedback and the usage record to Discord.
 
 | Where | What |
 | --- | --- |
-| `src/lib/lrc.ts` | Parsing, cleaning up and writing LRC |
-| `src/lib/srt.ts` | LRC to SRT, and reading subtitles edited by hand |
-| `src/lib/audio.ts` | Measuring how long an audio file really is |
 | `src/lib/lyrics-store.ts` | The in-memory store the editor and synchronizer share |
 | `src/hooks/use-clock.ts` | One clock for both audio playback and the stopwatch |
 | `src/components/export/` | The Edit panel, its code editor and the Upload dialog |
-| `src/lib/session-log.ts` | What the usage record contains |
-| `src/app/api/` | The feedback and log routes |
+| `src/lib/session-log.ts` | The usage record's fields and its message for Discord |
+| `src/lib/audio.ts` | Measuring an audio file's real length by decoding it |
+| `src/lib/lrc.ts` | Parsing lyrics, cleaning them up and writing the LRC |
+| `src/lib/srt.ts` | Turning LRC into SRT and reading hand-edited subtitles |
+| `src/app/api/` | The two routes that pass feedback and logs to Discord |
 
 ## Run it locally
 
@@ -222,7 +218,7 @@ set whichever you want:
 | Variable | What it does | Without it |
 | --- | --- | --- |
 | `DISCORD_WEBHOOK_URL` | Receives messages from the Feedback form | The form says feedback isn't set up |
-| `LOGGING` | Receives the usage record | Nothing is logged |
+| `LOGGING` | Receives the usage record | Nothing is logged anywhere |
 
 Make a webhook in Discord under Server Settings > Integrations > Webhooks.
 Use a different channel for each.
