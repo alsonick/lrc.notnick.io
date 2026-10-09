@@ -1,173 +1,238 @@
-# LRC Generator
+<p align="center">
+  <img src="public/assets/lrc-generator-logo.svg" alt="LRC Generator" width="96" height="96" />
+</p>
 
-Make timed `.lrc` lyric files in the browser: paste the lyrics, play the song,
-tap a key as each line starts, download the file.
-Live at [lrc.notnick.io](https://lrc.notnick.io).
+<h1 align="center">LRC Generator</h1>
 
-Everything runs client-side. Lyrics are kept in memory only, so closing or
-reloading the site starts with a blank editor. The audio file stays in memory
-too and is never uploaded. The one thing that leaves the browser is a short
-log entry each time a file is downloaded, which anyone can switch off (see
-[Settings](#settings)).
+<p align="center">
+  <strong>A browser-based LRC generator for synced lyrics.
+</strong>
+</p>
 
-## Editor
+<p align="center">
+  <a href="LICENSE">
+    <img src="https://img.shields.io/static/v1?label=License&message=MIT&color=000" alt="MIT license" />
+  </a>
+  <a href="https://github.com/alsonick/lrc.notnick.io">
+    <img src="https://img.shields.io/static/v1?label=Built%20with&message=Next.js%20%2B%20TypeScript&color=3178C6" alt="Next.js and TypeScript" />
+  </a>
+  <a href="https://lrc.notnick.io">
+    <img src="https://img.shields.io/website?url=https%3A%2F%2Flrc.notnick.io&label=lrc.notnick.io&up_message=online&up_color=30d158" alt="lrc.notnick.io status" />
+  </a>
+</p>
 
-Paste lyrics from Genius or anywhere else, then tidy them with the toolbar:
+<p align="center">
+  <a href="https://lrc.notnick.io"><strong>Open the app</strong></a> &bull;
+  <a href="#run-it-locally">Run it locally</a> &bull;
+  <a href="https://lrc.notnick.io/privacy">Privacy</a> &bull;
+  <a href="https://github.com/alsonick/lrc.notnick.io/issues/new">Suggestions</a>
+</p>
 
-- **Strip sections** removes `[Verse 1]`, `[Chorus]` and other headers, plus
-  the leftovers Genius adds when copying.
-- **Strip tags** removes existing `[mm:ss.xx]` time tags and metadata lines.
-- **Strip parentheses** removes asides such as `(Let's go)` and drops lines
-  that were nothing but one.
-- **lowercase** / **UPPERCASE** change the case. **Original** restores the
-  pasted casing.
-- **Reset** clears the editor.
+---
 
-Each of these shows a toast with an Undo button.
+LRC Generator makes synced lyric files. An `.lrc` is a plain text file with a
+timestamp in front of every line, and it is what music players and karaoke
+apps read to show lyrics in time with a song.
 
-Below the text: **Copy**, **Download .lrc** (once something is synced) and
-**Synchronize**. Pasting an existing `.lrc` works; its timestamps are kept,
-and metadata lines such as `[ar: Artist]` are never stamped.
+You paste the lyrics, play the track, and press a key as each line starts.
+At the end you get the `.lrc`, and the same timings as `.srt` subtitles if you
+want them. There is nothing to install and no account to make.
 
-## Synchronize
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/synchronize-dark.png" />
+    <img src=".github/synchronize-light.png" alt="The synchronizer part way through a song, with stamped lines above the current one" />
+  </picture>
+</p>
 
-- **Audio** loads a file. Without one, START runs a stopwatch so you can sync
-  to music playing elsewhere.
-- **START** begins playback, after the countdown picked in the dropdown beside
-  it. The button becomes the running clock; click it to pause and it reads
-  **Continue**.
-- **Next Line** stamps the current line. The dropdown beside it shifts every
-  stamp earlier by that amount, for anyone who tends to press late.
-- While paused, click the dot in front of a stamped line to clear it and every
-  line after it. With a file loaded, playback rewinds two seconds before that
-  line.
-- While paused, click a line's text to edit it. Click anywhere else, or
-  Continue, to keep the change; `Esc` cancels. Timestamps are kept.
-- Once every line is stamped, Next Line reads **Done**. Click it to stop and
-  choose: **Edit** opens the file for a last look (see below), and **Cancel**
-  downloads the `.lrc` as it is. Files are named after the audio file.
-  **Save .lrc** downloads the `.lrc` again any time.
-- **Editor** goes back to the editor with every stamp intact.
-
-Keep the `.lrc` next to the audio with the same file name and most players
-pick it up.
-
-### Edit
-
-A panel slides in from the right with the `.lrc` and the `.srt` it converts to
-side by side, both as editable text with their time tags highlighted.
-
-- Lines without a timestamp, and timestamps earlier than the line above, are
-  marked. The footer explains the one under the caret and **Next** / **Show**
-  walks through the rest, for whichever side you're working in.
-- The caret on one side tints the matching lines on the other. **Revert**
-  undoes every edit made to the `.lrc` since the panel opened (and
-  `Cmd/Ctrl+Z` undoes the revert).
-- The subtitles follow the `.lrc` until you edit them. From then on they are
-  their own text: press Enter for a second row in a subtitle, change its
-  times, or **Add** a new one after the caret (it starts where that one ends,
-  or shares its time when the next follows with no gap). Changes to the `.lrc`
-  no longer reach them until **Revert** on that side rebuilds them from it.
-- Blocks that can't become a subtitle (an unreadable time range, an end before
-  the start, no text, text without a time range) are marked and left out.
-- **Download as LRC** saves the text as it is, minus blank lines.
-- **Download as SRT** saves the subtitles, numbered afresh. Hand edits to them
-  live only in the panel, so closing before downloading them asks first.
-- When converting from the `.lrc`, each subtitle lasts until the next line
-  starts; a timestamp on its own line, like `[01:02.00]`, ends the one before
-  it early; the last one stays up until the song ends when the audio is known
-  (loaded in the synchronizer, or added in the **Upload** dialog), and for five
-  seconds when it isn't. The length is measured by decoding the audio, which is
-  exact even for MP3s whose header only lets players estimate it. Untimed lines
-  are left out, `[offset: …]` is applied, and a line with several timestamps
-  becomes one subtitle per timestamp.
-- Closing the panel keeps the edits in the lyrics, with a toast to undo them.
-- **Upload** in the header opens an existing `.lrc` on any page, without
-  syncing anything first. The song's audio can be added there too; it's
-  optional, but recommended so the last subtitle runs until the song ends.
-  An uploaded file stands on its own: downloads are named after it, its edits
-  only go into them, and the lyrics in the editor stay as they are.
-
-### Keyboard
-
-| Key | Action |
-| --- | --- |
-| `Enter`, `Space`, `↓`, `→` | Next line (or start / continue) |
-| `Backspace`, `↑`, `←` | Undo last line |
-| `P` | Play / pause |
-
-### Output
+## What you get
 
 ```
-[00:12.40]I've been walking down this road
-[00:15.92]Looking for a place to call my own
+[00:12.40]I left the porch light on for you
+[00:15.92]Just in case the night ran long
 ```
 
-Blank lines show as spacing in the synchronizer and are left out of the file.
-
-The same lines as `.srt`:
+Keep that file next to the audio, with the same name, and most players pick
+it up on their own. The same two lines as subtitles:
 
 ```
 1
 00:00:12,400 --> 00:00:15,920
-I've been walking down this road
+I left the porch light on for you
 
 2
-00:00:15,920 --> 00:00:20,920
-Looking for a place to call my own
+00:00:15,920 --> 00:00:19,310
+Just in case the night ran long
 ```
 
-## Settings
+## Cleanup
 
-The gear in the header opens the settings, which apply as they're changed and
-are saved in the browser. **Done** confirms with a toast when any were changed.
+Lyrics copied from Genius, or most other sites, arrive with section headers,
+ad-libs in brackets and a few stray lines from the page. The editor's toolbar
+gets rid of them:
 
-- **Theme**: light, dark, or whatever the device is set to.
-- **Log**: the download log, on until it's switched off. While it's on, every
-  download of an `.lrc` or `.srt` reports:
-  - which of the two was saved, and how many of each so far in this visit;
-  - the saved file's name, how many lyric lines or subtitles it holds, and
-    whether it was changed in the Edit panel first;
-  - where the lyrics came from: synced in the app, saved from the editor, or
-    an uploaded `.lrc`;
-  - the audio file's name and length, if one was loaded (that is what lets the
-    last subtitle end with the song);
-  - the theme;
-  - how long the page had been open;
-  - the browser (its user agent, as feedback also sends), its language, and
-    the host name of the site that linked here, if any.
+- **Strip sections** removes `[Verse 1]`, `[Chorus]` and other headers, along
+  with the leftovers Genius adds when you copy.
+- **Strip tags** removes existing `[mm:ss.xx]` time tags and metadata lines.
+- **Strip ()** removes asides such as `(Let's go)`, and drops any line that
+  was nothing but one.
+- **lowercase** and **UPPERCASE** change the case. **Original** puts it back
+  the way you pasted it.
 
-  The lyrics and the audio themselves are never sent. Anything else that logs
-  from the browser should check `isLoggingEnabled()` in `src/lib/settings.ts`
-  first, as `src/lib/report-download.ts` does.
+Each of these shows a toast with an Undo button, so nothing is a one-way
+trip. Pasting a file that is already timed works too. Its timestamps are
+kept, and metadata lines such as `[ar: Artist]` are never stamped.
 
-**Privacy Policy** in the footer, and the link in the Log switch's hint, open
-the privacy policy at `/privacy`. It summarises what the log sends, so update
-`src/app/privacy/page.tsx` (and its dates) whenever that changes.
+## Synchronize
 
-## Running locally
+Load the audio, press **START**, and hit `Enter` or `Space` every time a line
+begins. That line gets the current time and the next one moves up.
+
+A few things make this less fiddly than it sounds:
+
+- No audio file? START runs a stopwatch instead, so you can sync against
+  music playing in another app.
+- A countdown of 3, 5 or 10 seconds, with a beep each second, gives you time
+  to get your hands back on the keyboard.
+- If you always press a little late, the dropdown beside **Next Line** shifts
+  every stamp earlier, by anything up to three seconds.
+- Got one wrong? Pause, then click the dot in front of a stamped line. That
+  line and everything after it are cleared, and playback goes back to two
+  seconds before it so you can go again.
+- Spotted a typo? While paused, click the line's text to fix it. The
+  timestamp stays.
+
+| Key | Action |
+| --- | --- |
+| `Enter`, `Space`, `↓`, `→` | Next line (or start / continue) |
+| `Backspace`, `↑`, `←` | Undo the last line |
+| `P` | Play / pause |
+
+When every line is stamped, Next Line reads **Done**. Files are named after
+the audio file, and blank lines, which show as spacing while you sync, are
+left out of them.
+
+## Fix it before you save it
+
+Done asks one question: **Edit**, or **Cancel** to download the `.lrc` as it
+is. Edit opens a panel with the `.lrc` on the left and the `.srt` it converts
+to on the right. Both are plain editable text.
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/edit-dark.png" />
+    <img src=".github/edit-light.png" alt="The Edit panel, with an .lrc file on the left and the matching .srt subtitles on the right" />
+  </picture>
+</p>
+
+Lines with no timestamp, and timestamps that run backwards, are marked. The
+footer says what is wrong with the one under your caret and walks you through
+the rest. Put the caret on a line and its counterpart on the other side lights
+up.
+
+The subtitles follow the `.lrc` until you edit them by hand. After that they
+are their own text: split one over two rows, change its times, or **Add** a
+new one after the caret. **Revert** undoes your edits to the `.lrc`, and on
+the subtitle side it rebuilds them from the `.lrc`. Hand edits to the
+subtitles only exist in the panel, so closing it before you have downloaded
+them asks first.
+
+### How an .lrc becomes an .srt
+
+- Each subtitle stays up until the next line starts.
+- A timestamp on a line of its own, like `[01:02.00]`, ends the one before it
+  early. That is how you leave a gap for an instrumental.
+- The last subtitle runs until the song ends when the app knows the audio,
+  and for five seconds when it doesn't.
+- The song's length is measured by decoding the audio. That is exact even for
+  MP3s whose header only lets a player estimate it.
+- Lines without a timestamp are left out, `[offset: …]` is applied, and a
+  line with several timestamps becomes one subtitle for each.
+
+## Bring a file you already have
+
+**Upload** in the header opens an existing `.lrc` straight in the Edit panel,
+with no syncing first. Add the song's audio as well if you want the last
+subtitle to run to the end.
+
+Despite the name, nothing is uploaded. The file is read by your browser, and
+it stands on its own: downloads are named after it, and the lyrics in the
+editor are left alone.
+
+## What leaves your browser
+
+Your lyrics and your audio don't. Lyrics are held in memory, so reloading the
+page gives you a blank editor, and the audio is played
+and measured on your machine.
+
+Two things are sent, both to a private Discord text channel:
+
+- **Feedback**
+- **Usage**
+
+There are no cookies, no account and no third-party analytics. Read more here > [lrc.notnick.io/privacy](https://lrc.notnick.io/privacy).
+
+## How it fits together
+
+```mermaid
+flowchart LR
+    paste[Pasted lyrics] --> editor[Editor]
+    editor --> sync[Synchronizer]
+    audio[Audio file or stopwatch] --> sync
+    sync --> panel[Edit panel]
+    existing[An .lrc you already have] --> panel
+    sync --> lrc[.lrc]
+    panel --> lrc
+    panel --> srt[.srt]
+```
+
+It is a Next.js 16 app (App Router) with React 19, TypeScript, Tailwind CSS 4
+and shadcn/ui on Base UI. There is no database. The only server code is two
+small routes that forward feedback and the usage record to Discord.
+
+| Where | What |
+| --- | --- |
+| `src/lib/lrc.ts` | Parsing, cleaning up and writing LRC |
+| `src/lib/srt.ts` | LRC to SRT, and reading subtitles edited by hand |
+| `src/lib/audio.ts` | Measuring how long an audio file really is |
+| `src/lib/lyrics-store.ts` | The in-memory store the editor and synchronizer share |
+| `src/hooks/use-clock.ts` | One clock for both audio playback and the stopwatch |
+| `src/components/export/` | The Edit panel, its code editor and the Upload dialog |
+| `src/lib/session-log.ts` | What the usage record contains |
+| `src/app/api/` | The feedback and log routes |
+
+## Run it locally
+
+You need [Node 20.9](https://nodejs.org) or newer and [pnpm](https://pnpm.io).
 
 ```bash
+git clone https://github.com/alsonick/lrc.notnick.io
+cd lrc.notnick.io
 pnpm install
 pnpm dev
 ```
 
 Then open http://localhost:3000. `pnpm build` and `pnpm start` serve the
-production build; `pnpm lint` runs ESLint.
+production build, and `pnpm lint` runs ESLint.
 
-The **Feedback** button in the header posts to a Discord webhook. Copy
-`.env.example` to `.env.local` and set `DISCORD_WEBHOOK_URL` (Discord: Server
-Settings > Integrations > Webhooks > New Webhook). Without it the form shows
-"Feedback isn't set up on this server yet."
+The app works without any configuration. Two optional Discord webhooks switch
+on the parts that talk to a server. Copy `.env.example` to `.env.local` and
+set whichever you want:
 
-The download log (see [Settings](#settings)) posts to a webhook of its own:
-set `LOGGING` the same way, ideally to a different channel. Without it nothing
-is logged.
+| Variable | What it does | Without it |
+| --- | --- | --- |
+| `DISCORD_WEBHOOK_URL` | Receives messages from the Feedback form | The form says feedback isn't set up |
+| `LOGGING` | Receives the usage record | Nothing is logged |
 
-## Stack
+Make a webhook in Discord under Server Settings > Integrations > Webhooks.
+Use a different channel for each.
 
-Next.js 16 (App Router), React 19, Tailwind CSS 4, shadcn/ui on Base UI,
-next-themes, sonner and lucide. LRC parsing lives in `src/lib/lrc.ts`, SRT
-conversion in `src/lib/srt.ts`, the shared lyrics store in
-`src/lib/lyrics-store.ts`, the audio / stopwatch clock in
-`src/hooks/use-clock.ts`, and the download log in `src/lib/session-log.ts`.
+## Feedback
+
+Bugs and ideas are welcome. [Open an issue](https://github.com/alsonick/lrc.notnick.io/issues/new),
+or use the Feedback button in the app, which comes straight to me.
+
+
+## License
+
+[MIT](LICENSE).
