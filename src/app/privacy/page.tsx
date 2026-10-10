@@ -113,7 +113,7 @@ export default function Page() {
 }
 
 const LINK_CLASS =
-  "rounded-xs text-foreground underline underline-offset-3 outline-none transition-colors hover:text-primary focus-visible:ring-3 focus-visible:ring-ring/50";
+  "rounded-xs text-foreground underline underline-offset-3 outline-none transition-colors hover:text-primary focus-visible:ring-3 focus-visible:ring-ring";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (

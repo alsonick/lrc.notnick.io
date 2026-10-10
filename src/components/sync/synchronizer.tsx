@@ -1,13 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Edit3 } from "react-feather";
 import { toast } from "sonner";
 
 import { SyncSession } from "@/components/sync/sync-session";
-import { Button } from "@/components/ui/button";
 import {
   isLyric,
   parseLyrics,
@@ -49,14 +46,6 @@ export function Synchronizer({ initialText }: { initialText: string }) {
     return (
       <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center px-4 py-16 text-center">
         <h1 className="text-xl font-semibold">Nothing to synchronize yet.</h1>
-        <Button
-          className="mt-3"
-          nativeButton={false}
-          render={<Link href="/" />}
-        >
-          <Edit3 />
-          Open the editor
-        </Button>
       </div>
     );
   }

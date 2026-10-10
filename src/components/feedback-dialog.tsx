@@ -85,7 +85,7 @@ export function FeedbackDialog({
         <DialogTrigger
           render={<Button variant="ghost" className={className} />}
         >
-          <MessageSquare />
+          <MessageSquare aria-hidden />
           Feedback
         </DialogTrigger>
       )}
@@ -148,7 +148,7 @@ export function FeedbackDialog({
               Cancel
             </DialogClose>
             <Button type="submit" disabled={!canSend}>
-              <Send />
+              <Send aria-hidden />
               {sending ? "Sending…" : "Send"}
             </Button>
           </DialogFooter>

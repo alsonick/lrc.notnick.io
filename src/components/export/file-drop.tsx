@@ -173,7 +173,7 @@ export function DropZone({
         onClick={() => inputRef.current?.click()}
         data-dragging={highlighted || undefined}
         className={cn(
-          "group flex w-full items-center gap-2.5 rounded-lg border border-dashed border-foreground/20 p-2.5 text-left transition-colors outline-none **:pointer-events-none hover:border-foreground/35 hover:bg-muted/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 data-dragging:border-primary data-dragging:bg-primary/5",
+          "group flex w-full items-center gap-2.5 rounded-lg border border-dashed border-foreground/20 p-2.5 text-left transition-colors outline-none **:pointer-events-none hover:border-foreground/35 hover:bg-muted/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring data-dragging:border-primary data-dragging:bg-primary/5",
           large && "flex-col justify-center gap-3 px-4 py-8 text-center",
         )}
       >
@@ -183,7 +183,7 @@ export function DropZone({
             large && "size-10 rounded-xl",
           )}
         >
-          <Icon className={large ? "size-5" : "size-4"} />
+          <Icon aria-hidden className={large ? "size-5" : "size-4"} />
         </span>
         <span className="min-w-0">
           <span className="block text-sm font-medium">{label}</span>
@@ -233,7 +233,7 @@ export function PickedFile({
   return (
     <div className="flex items-center gap-2.5 rounded-lg bg-background p-2.5 shadow-xs ring-1 ring-foreground/10 dark:bg-input/30">
       <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/15 text-primary">
-        <Icon className="size-4" />
+        <Icon aria-hidden className="size-4" />
       </span>
       <div className="min-w-0 flex-1">
         <p className="truncate font-mono text-xs font-medium" title={name}>
@@ -248,7 +248,7 @@ export function PickedFile({
         aria-label={removeLabel}
         title={removeLabel}
       >
-        <X />
+        <X aria-hidden />
       </Button>
     </div>
   );

@@ -60,17 +60,21 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
   --primary: #30d158;
-  --primary-foreground: oklch(1 0 0);
+  /* Dark on the bright green: white only reaches 2:1 against it. */
+  --primary-foreground: oklch(0.145 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  /* Dark enough for 4.5:1 on the canvas and on `muted`, not just on white. */
+  --muted-foreground: oklch(0.52 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
+  --destructive: oklch(0.505 0.213 27.518);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: #30d158;
+  /* Focus rings: a deeper green here, since the brand one is only 2:1 on
+     white. Dark surfaces set it back (see the header and synchronizer). */
+  --ring: oklch(0.527 0.154 150.069);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -97,14 +101,14 @@
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
   --primary: #30d158;
-  --primary-foreground: oklch(1 0 0);
+  --primary-foreground: oklch(0.145 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
+  --destructive: oklch(0.77 0.14 21);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: #30d158;
@@ -125,13 +129,21 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring;
+  }
+  /* Keyboard focus is always drawn. Components that draw their own ring opt
+     out with `outline-none`; everything else (plain links, say) gets this. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
   }
   body {
     @apply bg-canvas text-foreground;
   }
   html {
     @apply font-sans;
+    /* Room for the sticky header, so what the Tab key lands on isn't under it. */
+    scroll-padding-top: 4.5rem;
   }
 }
 :root {
@@ -187,6 +199,76 @@
 .theme-revealing:has([data-slot="dialog-overlay"], [data-slot="sheet-overlay"])
   .app-shell {
   filter: blur(var(--blur-xs));
+}
+
+/* The first Tab stop on every page. Off screen until it has focus. */
+.skip-link {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 60;
+  transform: translateY(-200%);
+  border-radius: var(--radius-md);
+  background: var(--background);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--foreground);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.2);
+}
+.skip-link:focus {
+  transform: none;
+}
+
+/* Windows high-contrast mode throws away backgrounds and shadows, which is
+   how most of the app shows focus, selection and state. Give those back as
+   outlines and system colours. */
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 2px solid Highlight !important;
+    outline-offset: 2px !important;
+  }
+  /* The open page in the header, and the current line in the synchronizer. */
+  [aria-current] {
+    outline: 1px solid CanvasText;
+  }
+  [role="switch"] {
+    border-color: ButtonText;
+  }
+  [role="switch"][aria-checked="true"],
+  [role="radio"][aria-checked="true"] {
+    background: Highlight;
+    color: HighlightText;
+    forced-color-adjust: none;
+  }
+  [role="switch"] > * {
+    background: ButtonText;
+    forced-color-adjust: none;
+  }
+}
+
+/* Sonner's coloured toasts in light mode: its own text colours stop just
+   short of 4.5:1 on their tinted backgrounds. */
+.toaster[data-sonner-toaster][data-sonner-theme="light"] {
+  --success-text: hsl(140, 100%, 20%);
+  --info-text: hsl(210, 92%, 34%);
+  --warning-text: hsl(31, 92%, 29%);
+  --error-text: hsl(360, 100%, 37%);
+}
+
+/* Anyone who asks their device for less motion gets none of the decoration:
+   dialogs, panels and toasts appear in place, and nothing glides. The
+   durations are tiny rather than zero so the end-of-animation events that
+   close dialogs still fire. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Icons spring up a little while they, or the control they sit in, are

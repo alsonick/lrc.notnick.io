@@ -65,7 +65,7 @@ export function ThemePicker({
         <Radio.Root
           key={option.value}
           value={option.value}
-          className="flex cursor-pointer items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium text-muted-foreground transition-colors outline-none select-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 data-checked:bg-background data-checked:text-foreground data-checked:shadow-xs dark:data-checked:bg-input/60 [&_svg]:size-4 [&_svg]:shrink-0"
+          className="flex cursor-pointer items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium text-muted-foreground transition-colors outline-none select-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring data-checked:bg-background data-checked:text-foreground data-checked:shadow-xs dark:data-checked:bg-input/60 [&_svg]:size-4 [&_svg]:shrink-0"
         >
           <option.icon aria-hidden />
           {option.label}

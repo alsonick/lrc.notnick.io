@@ -48,7 +48,7 @@ export function LyricRow({
   if (state === "blank") return <li aria-hidden className="h-3" />;
   if (state === "meta") {
     return (
-      <li className="flex items-center gap-2 px-2 font-mono text-xs text-white/35">
+      <li className="flex items-center gap-2 px-2 font-mono text-xs text-white/65">
         <span aria-hidden className="w-5 shrink-0" />
         <span className="min-w-0 flex-1 truncate">{text}</span>
       </li>
@@ -60,10 +60,11 @@ export function LyricRow({
   return (
     <li
       data-line={index}
+      aria-current={state === "current" ? "true" : undefined}
       className={cn(
         "flex items-center gap-2 rounded-md px-2 py-1 text-lg font-semibold leading-snug transition-colors sm:text-xl",
-        state === "upcoming" && "text-neutral-400",
-        state === "done" && "text-white/85",
+        state === "upcoming" && "text-white/65",
+        state === "done" && "text-white/90",
         state === "current" && "bg-primary/15 text-white",
       )}
     >
@@ -78,7 +79,7 @@ export function LyricRow({
                 ? `Undo from here and rewind ${rewindSeconds}s before this line`
                 : "Undo this line and everything after it"
             }
-            className="group/dot flex size-6 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            className="group/dot flex size-6 shrink-0 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-white"
           >
             <span
               aria-hidden
@@ -94,7 +95,7 @@ export function LyricRow({
           type="button"
           onClick={onEdit}
           aria-label={`Edit "${text}"`}
-          className="-mx-1 min-w-0 flex-1 cursor-text rounded px-1 text-left wrap-break-word outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white/60"
+          className="-mx-1 min-w-0 flex-1 cursor-text rounded px-1 text-left wrap-break-word outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white"
         >
           {text}
         </button>
@@ -102,7 +103,7 @@ export function LyricRow({
         <span className="min-w-0 flex-1 wrap-break-word">{text}</span>
       )}
       {stamped && time !== null ? (
-        <span className="shrink-0 font-mono text-xs font-normal text-white/40 tabular-nums">
+        <span className="shrink-0 font-mono text-xs font-normal text-white/70 tabular-nums">
           {formatTime(time)}
         </span>
       ) : null}

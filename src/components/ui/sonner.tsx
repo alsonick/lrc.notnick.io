@@ -17,21 +17,22 @@ const Toaster = ({ ...props }: ToasterProps) => {
     <Sonner
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
+      closeButton
       icons={{
         success: (
-          <CheckCircle className="size-4" />
+          <CheckCircle aria-hidden className="size-4" />
         ),
         info: (
-          <Info className="size-4" />
+          <Info aria-hidden className="size-4" />
         ),
         warning: (
-          <AlertTriangle className="size-4" />
+          <AlertTriangle aria-hidden className="size-4" />
         ),
         error: (
-          <XOctagon className="size-4" />
+          <XOctagon aria-hidden className="size-4" />
         ),
         loading: (
-          <Loader className="size-4 animate-spin" />
+          <Loader aria-hidden className="size-4 animate-spin" />
         ),
       }}
       style={

@@ -46,7 +46,7 @@ export function SiteHeader() {
   return (
     // While a theme switch blurs the page (see globals.css) the bar's colour
     // carries on past the screen's edges, or the blur would fade them out.
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-neutral-900 text-white in-[.theme-revealing]:shadow-[0_-1rem_0_1rem_var(--color-neutral-900)]">
+    <header className="sticky top-0 z-40 border-b border-white/10 bg-neutral-900 text-white [--ring:#30d158] in-[.theme-revealing]:shadow-[0_-1rem_0_1rem_var(--color-neutral-900)]">
       <div className="mx-auto flex h-14 w-full max-w-5xl items-center gap-3 px-4 sm:gap-4">
         <Link
           href="/"
@@ -55,7 +55,10 @@ export function SiteHeader() {
         >
           <Logo className="size-7" />
         </Link>
-        <nav className="ml-auto flex items-center gap-0.5 sm:gap-1">
+        <nav
+          aria-label="Main"
+          className="ml-auto flex items-center gap-0.5 sm:gap-1"
+        >
           {NAV.map((item) => (
             <NavLink key={item.href} {...item} />
           ))}
@@ -173,7 +176,7 @@ function HelpDialog() {
       <DialogTrigger
         render={<Button variant="ghost" className={NAV_BUTTON_CLASS} />}
       >
-        <HelpCircle />
+        <HelpCircle aria-hidden />
         <span className="sr-only sm:not-sr-only">Help</span>
       </DialogTrigger>
       <DialogContent
@@ -191,14 +194,14 @@ function HelpDialog() {
             />
           }
         >
-          <X />
+          <X aria-hidden />
           <span className="sr-only">Close</span>
         </DialogClose>
         <div className="border-b bg-muted/40 px-6 pt-5 pr-12 pb-4">
           <DialogHeader>
             <div className="flex items-center gap-3">
               <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
-                <Activity className="size-5" />
+                <Activity aria-hidden className="size-5" />
               </span>
               <DialogTitle className="text-lg">How to make an LRC file</DialogTitle>
             </div>
@@ -209,8 +212,11 @@ function HelpDialog() {
           {STEPS.map((step, index) => (
             <li key={step.title} className="flex gap-4">
               <span className="relative flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
-                <step.icon className="size-4" />
-                <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                <step.icon aria-hidden className="size-4" />
+                <span
+                  aria-hidden
+                  className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground"
+                >
                   {index + 1}
                 </span>
               </span>
