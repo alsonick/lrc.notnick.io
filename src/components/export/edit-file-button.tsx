@@ -118,7 +118,7 @@ export function EditFileButton({ className }: { className?: string }) {
           ref={triggerRef}
           render={<Button variant="ghost" className={className} />}
         >
-          <UploadCloud />
+          <UploadCloud aria-hidden />
           Upload
         </DialogTrigger>
         <DialogContent {...drop.popupProps} className="sm:max-w-md">
@@ -187,7 +187,7 @@ export function EditFileButton({ className }: { className?: string }) {
               Cancel
             </DialogClose>
             <Button ref={editRef} disabled={!lrc} onClick={openPanel}>
-              <Edit />
+              <Edit aria-hidden />
               Edit
             </Button>
           </DialogFooter>

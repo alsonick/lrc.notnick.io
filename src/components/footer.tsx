@@ -17,7 +17,7 @@ const SOCIALS = [
 
 /** Shared by the links and by Feedback, which is a button that looks like one. */
 const LINK_CLASS =
-  "group flex w-fit cursor-pointer items-center rounded-xs text-sm whitespace-nowrap text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50";
+  "group flex min-h-6 w-fit cursor-pointer items-center rounded-xs text-sm whitespace-nowrap text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring";
 
 export function Footer() {
   return (
@@ -27,7 +27,7 @@ export function Footer() {
           <div className="max-w-xs">
             <Link
               href="/"
-              className="flex w-fit items-center rounded-xs outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="flex w-fit items-center rounded-xs outline-none focus-visible:ring-3 focus-visible:ring-ring"
             >
               <Logo className="size-6" />
               <p className="ml-2 text-lg font-bold tracking-tighter">
@@ -46,9 +46,9 @@ export function Footer() {
                     ? {}
                     : { target: "_blank", rel: "noopener noreferrer" })}
                   // The marks sit still: no icon hover bounce (see globals.css).
-                  className="flex size-8 items-center justify-center rounded-lg border bg-background text-muted-foreground shadow-xs outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 dark:border-input dark:bg-input/30 dark:hover:bg-input/50 [&_svg]:size-4 [&_svg]:transform-none"
+                  className="flex size-8 items-center justify-center rounded-lg border bg-background text-muted-foreground shadow-xs outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring dark:border-input dark:bg-input/30 dark:hover:bg-input/50 [&_svg]:size-4 [&_svg]:transform-none"
                 >
-                  <item.icon />
+                  <item.icon aria-hidden />
                 </a>
               ))}
             </div>
@@ -98,11 +98,11 @@ function FooterColumn({
     <div>
       <p
         id={id}
-        className="text-xs font-semibold tracking-wider text-muted-foreground/70 uppercase"
+        className="text-xs font-semibold tracking-wider text-muted-foreground uppercase"
       >
         {title}
       </p>
-      <ul aria-labelledby={id} className="mt-4 flex flex-col gap-2.5">
+      <ul aria-labelledby={id} className="mt-4 flex flex-col gap-1.5">
         {children}
       </ul>
     </div>

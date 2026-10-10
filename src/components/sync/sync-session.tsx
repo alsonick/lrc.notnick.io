@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import {
@@ -43,6 +44,7 @@ import {
 import { useClock, useClockTime, type Clock } from "@/hooks/use-clock";
 import { usePersistedState } from "@/hooks/use-persisted-state";
 import { beep } from "@/lib/beep";
+import { UNDO_TOAST_MS } from "@/lib/constants";
 import { downloadTextFile, stripExtension } from "@/lib/file";
 import {
   buildLrcFile,
@@ -55,6 +57,7 @@ import {
 } from "@/lib/lrc";
 import type { AudioSource } from "@/lib/lyrics-store";
 import { reportDownload } from "@/lib/report-download";
+import { areShortcutsEnabled, subscribeToSettings } from "@/lib/settings";
 import { cn } from "@/lib/utils";
 
 /** How far playback rewinds before a line when that line is undone. */
@@ -87,7 +90,7 @@ const SHORTCUT_KEYCAPS: Partial<Record<string, string>> = {
 
 /** Keycaps sink quickly while held and spring back on release. */
 const KEYCAP_CLASS =
-  "[transition:translate_500ms_var(--ease-spring),scale_500ms_var(--ease-spring),color_200ms,background-color_200ms,border-color_200ms] data-pressed:translate-y-px data-pressed:scale-90 data-pressed:border-primary/50 data-pressed:bg-primary/20 data-pressed:text-primary data-pressed:duration-75 data-pressed:ease-out motion-reduce:transition-none dark:data-pressed:border-primary/50 dark:data-pressed:bg-primary/20 dark:data-pressed:text-primary";
+  "[transition:translate_500ms_var(--ease-spring),scale_500ms_var(--ease-spring),color_200ms,background-color_200ms,border-color_200ms] data-pressed:translate-y-px data-pressed:scale-90 data-pressed:border-primary/50 data-pressed:bg-primary/20 data-pressed:text-green-800 data-pressed:duration-75 data-pressed:ease-out motion-reduce:transition-none dark:data-pressed:border-primary/50 dark:data-pressed:bg-primary/20 dark:data-pressed:text-primary";
 
 type Props = {
   lines: LyricLine[];
@@ -130,6 +133,13 @@ export function SyncSession({
   const [exportOpen, setExportOpen] = useState(false);
   /** Next Line / Done, where focus returns once the export panel closes. */
   const nextButtonRef = useRef<HTMLButtonElement>(null);
+  const startButtonRef = useRef<HTMLButtonElement>(null);
+  /** Off when someone has switched the single-key shortcuts off in Settings. */
+  const shortcuts = useSyncExternalStore(
+    subscribeToSettings,
+    areShortcutsEnabled,
+    () => true,
+  );
   /** Index of the line whose text is being edited inline, if any. */
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   /** Keycaps whose key is held down right now. */
@@ -178,8 +188,18 @@ export function SyncSession({
       list.getBoundingClientRect().top +
       list.scrollTop;
     const top = offset - list.clientHeight / 2 + row.offsetHeight / 2;
-    list.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    list.scrollTo({ top: Math.max(0, top), behavior: calm ? "auto" : "smooth" });
   }, [currentLine]);
+
+  // Once the song is playing, the next thing to press is Next Line. If START
+  // is what set it going, focus moves there, so Enter and Space carry on
+  // from the keyboard and a screen reader says what comes next.
+  useEffect(() => {
+    if (isPlaying && document.activeElement === startButtonRef.current) {
+      nextButtonRef.current?.focus({ preventScroll: true });
+    }
+  }, [isPlaying]);
 
   /** Name for every file saved from this session, taken from the audio. */
   const fileBase = stripExtension(audio?.name ?? "lyrics") || "lyrics";
@@ -318,6 +338,7 @@ export function SyncSession({
 
   // Keyboard shortcuts.
   useEffect(() => {
+    if (!shortcuts) return;
     /** True when the key press belongs to a text field, menu or dialog. */
     const isTyping = (event: KeyboardEvent) => {
       const target = event.target instanceof Element ? event.target : null;
@@ -325,6 +346,19 @@ export function SyncSession({
         target?.closest(
           "input, textarea, select, [contenteditable='true'], [role='listbox'], [role='dialog']",
         )
+      ) {
+        return true;
+      }
+      // A button or link reached with the keyboard keeps its own Enter and
+      // Space, or nothing on this page could be worked without a mouse. One
+      // that was clicked gives them up, so stamping carries on after a
+      // click. Next Line is the exception: there the shortcut and the button
+      // mean the same thing, and the shortcut stamps on the way down.
+      if (
+        (event.key === "Enter" || event.key === " ") &&
+        target?.closest("a[href], button, [role='button']") &&
+        !target.closest("[data-stamps]") &&
+        target.matches(":focus-visible")
       ) {
         return true;
       }
@@ -394,7 +428,7 @@ export function SyncSession({
       window.removeEventListener("keyup", onKeyUp);
       window.removeEventListener("blur", onBlur);
     };
-  }, [isPlaying, nextLine, togglePlayback, undoLast]);
+  }, [isPlaying, nextLine, shortcuts, togglePlayback, undoLast]);
 
   function resetAll() {
     onLinesChange(lines.map((line) => ({ ...line, time: null })));
@@ -428,6 +462,7 @@ export function SyncSession({
     onLinesChange(next);
     toast.success("Lyrics updated with your edits", {
       action: { label: "Undo", onClick: () => onLinesChange(before) },
+      duration: UNDO_TOAST_MS,
     });
   }
 
@@ -450,7 +485,7 @@ export function SyncSession({
   } else if (isPlaying) {
     startContent = (
       <>
-        <Pause />
+        <Pause aria-hidden />
         <ClockDisplay clock={clock} />
       </>
     );
@@ -458,12 +493,17 @@ export function SyncSession({
   } else {
     startContent = (
       <>
-        <Play />
+        <Play aria-hidden />
         {started ? "Continue" : "START"}
       </>
     );
     startLabel = started ? "Continue" : "Start";
   }
+
+  const upNext =
+    cursor < syncable.length
+      ? `Next, line ${cursor + 1} of ${syncable.length}: ${lines[syncable[cursor]].text}`
+      : "Every line is stamped. Press Done to finish.";
 
   const status = [
     `${cursor} / ${syncable.length} lines`,
@@ -484,7 +524,7 @@ export function SyncSession({
 
       <section
         aria-label="Synchronizer"
-        className="isolate flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-linear-to-b from-neutral-500 via-neutral-600 to-neutral-800 shadow-lg ring-1 ring-black/20 dark:from-neutral-800 dark:via-neutral-900 dark:to-neutral-950 dark:ring-white/10"
+        className="isolate flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-linear-to-b from-neutral-700 via-neutral-800 to-neutral-900 shadow-lg ring-1 ring-black/20 [--ring:var(--color-white)] dark:from-neutral-800 dark:via-neutral-900 dark:to-neutral-950 dark:ring-white/10"
       >
         <div
           ref={listRef}
@@ -495,7 +535,7 @@ export function SyncSession({
               role="alert"
               className="mb-4 flex items-center gap-2 rounded-md bg-rose-500/20 px-3 py-2 text-sm text-rose-100 ring-1 ring-rose-400/40"
             >
-              <AlertTriangle className="size-4 shrink-0" />
+              <AlertTriangle aria-hidden className="size-4 shrink-0" />
               {clock.error}
             </p>
           ) : null}
@@ -523,6 +563,7 @@ export function SyncSession({
         {/* Rounded itself as well: while an icon's hover bounce runs, Chrome
             can paint this background outside the section's rounded clip. */}
         <div
+          role="group"
           aria-label="Playback controls"
           className="flex flex-wrap items-center gap-2 rounded-b-xl border-t border-white/10 bg-neutral-950/85 px-3 py-3"
         >
@@ -532,7 +573,7 @@ export function SyncSession({
               onEditor();
             }}
           >
-            <Edit3 />
+            <Edit3 aria-hidden />
             Editor
           </ToolbarButton>
 
@@ -540,7 +581,7 @@ export function SyncSession({
             onClick={() => setResetOpen(true)}
             disabled={!started && !isPlaying && countdown === null}
           >
-            <RotateCcw />
+            <RotateCcw aria-hidden />
             Reset
           </ToolbarButton>
 
@@ -548,7 +589,7 @@ export function SyncSession({
             <TooltipTrigger
               render={<ToolbarButton onClick={onPickAudio} className="max-w-36" />}
             >
-              <Music />
+              <Music aria-hidden />
               <span className="truncate">{audio ? audio.name : "Audio"}</span>
             </TooltipTrigger>
             <TooltipContent>
@@ -586,6 +627,7 @@ export function SyncSession({
               </SelectContent>
             </Select>
             <ToolbarButton
+              ref={startButtonRef}
               onClick={togglePlayback}
               disabled={audio !== null && !clock.ready}
               aria-label={startLabel}
@@ -622,6 +664,7 @@ export function SyncSession({
               ref={nextButtonRef}
               onClick={nextLine}
               disabled={!done && !isPlaying}
+              data-stamps={done ? undefined : ""}
               title={
                 done
                   ? "Download the .lrc, or edit it and convert it to .srt"
@@ -634,12 +677,12 @@ export function SyncSession({
             >
               {done ? (
                 <>
-                  <Check />
+                  <Check aria-hidden />
                   Done
                 </>
               ) : (
                 <>
-                  <ChevronRight />
+                  <ChevronRight aria-hidden />
                   Next Line
                 </>
               )}
@@ -657,27 +700,38 @@ export function SyncSession({
               title="Save .lrc"
               className={cn(done && READY_CLASS)}
             >
-              <Download />
+              <Download aria-hidden />
               <span className="hidden lg:inline">Save .lrc</span>
             </ToolbarButton>
           </div>
         </div>
       </section>
 
-      <p className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-        <span>
-          <Keycap pressed={pressedKeycaps.has("Enter")}>Enter</Keycap> /{" "}
-          <Keycap pressed={pressedKeycaps.has("Space")}>Space</Keycap> next
-          line
-        </span>
-        <span>
-          <Keycap pressed={pressedKeycaps.has("Backspace")}>Backspace</Keycap>{" "}
-          undo last line
-        </span>
-        <span>
-          <Keycap pressed={pressedKeycaps.has("P")}>P</Keycap> play / pause
-        </span>
+      {/* For screen readers: said after every stamp and every undo. */}
+      <p role="status" className="sr-only">
+        {upNext}
       </p>
+
+      {shortcuts ? (
+        <p className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          <span>
+            <Keycap pressed={pressedKeycaps.has("Enter")}>Enter</Keycap> /{" "}
+            <Keycap pressed={pressedKeycaps.has("Space")}>Space</Keycap> next
+            line
+          </span>
+          <span>
+            <Keycap pressed={pressedKeycaps.has("Backspace")}>Backspace</Keycap>{" "}
+            undo last line
+          </span>
+          <span>
+            <Keycap pressed={pressedKeycaps.has("P")}>P</Keycap> play / pause
+          </span>
+        </p>
+      ) : (
+        <p className="mt-3 text-center text-xs text-muted-foreground">
+          Keyboard shortcuts are off. Turn them back on in Settings.
+        </p>
+      )}
 
       <ConfirmDialog
         open={resetOpen}

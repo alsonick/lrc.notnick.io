@@ -312,7 +312,7 @@ export function ExportPanel({
       >
         <div className="flex shrink-0 items-center gap-3 border-b bg-muted/40 py-4 pr-14 pl-5">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
-            <Edit className="size-5" />
+            <Edit aria-hidden className="size-5" />
           </span>
           {/* Two tight lines, about as tall as the icon beside them. */}
           <div className="min-w-0 space-y-0.5">
@@ -344,7 +344,7 @@ export function ExportPanel({
                 onClick={revertLrc}
                 title="Undo every edit made since this panel opened"
               >
-                <RotateCcw />
+                <RotateCcw aria-hidden />
                 Revert
               </Button>
             </PaneHeader>
@@ -375,7 +375,7 @@ export function ExportPanel({
                 onClick={revertSrt}
                 title="Rebuild the subtitles from the .lrc, dropping the edits made here"
               >
-                <RotateCcw />
+                <RotateCcw aria-hidden />
                 Revert
               </Button>
               <Button
@@ -384,7 +384,7 @@ export function ExportPanel({
                 onClick={addCue}
                 title="Add a subtitle after this one. With no gap before the next, the two share this one's time."
               >
-                <Plus />
+                <Plus aria-hidden />
                 Add
               </Button>
               <span className="hidden text-xs text-muted-foreground tabular-nums xl:inline">
@@ -401,7 +401,7 @@ export function ExportPanel({
                     />
                   }
                 >
-                  <Info />
+                  <Info aria-hidden />
                 </TooltipTrigger>
                 <TooltipContent side="bottom" align="end" className="max-w-72">
                   <p className="leading-relaxed">
@@ -442,12 +442,15 @@ export function ExportPanel({
         </div>
 
         <div className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-t bg-muted/40 px-5 py-3">
-          <FileStatus
-            issues={status}
-            activeLine={side === "lrc" ? lrcLine : srtLine}
-            allClear={allClear}
-            onReveal={reveal}
-          />
+          {/* Stays mounted, so a screen reader hears the message change. */}
+          <div aria-live="polite" className="min-w-0">
+            <FileStatus
+              issues={status}
+              activeLine={side === "lrc" ? lrcLine : srtLine}
+              allClear={allClear}
+              onReveal={reveal}
+            />
+          </div>
           <div className="ml-auto flex items-center gap-2">
             <Button
               variant="outline"
@@ -455,7 +458,7 @@ export function ExportPanel({
               disabled={draft.trim() === ""}
               onClick={() => download("lrc")}
             >
-              {saved === "lrc" ? <Check /> : <Download />}
+              {saved === "lrc" ? <Check aria-hidden /> : <Download aria-hidden />}
               Download as LRC
             </Button>
             <Button
@@ -463,7 +466,7 @@ export function ExportPanel({
               disabled={srt.cues.length === 0}
               onClick={() => download("srt")}
             >
-              {saved === "srt" ? <Check /> : <Download />}
+              {saved === "srt" ? <Check aria-hidden /> : <Download aria-hidden />}
               Download as SRT
             </Button>
           </div>
@@ -500,7 +503,7 @@ function PaneHeader({
 }) {
   return (
     <div className="flex h-11 shrink-0 items-center gap-2 border-b px-4">
-      <Icon className="size-4 shrink-0 text-muted-foreground" />
+      <Icon aria-hidden className="size-4 shrink-0 text-muted-foreground" />
       <span className="min-w-0 truncate font-mono text-xs font-medium" title={name}>
         {name}
       </span>
@@ -530,7 +533,7 @@ function FileStatus({
     if (allClear === null) return null;
     return (
       <p className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground">
-        <CheckCircle className="size-4 shrink-0 text-primary" />
+        <CheckCircle aria-hidden className="size-4 shrink-0 text-primary" />
         {allClear}
       </p>
     );
@@ -542,7 +545,7 @@ function FileStatus({
   const count = issues.length;
   return (
     <p className="flex min-w-0 items-center gap-2 text-sm text-amber-700 dark:text-amber-400">
-      <AlertTriangle className="size-4 shrink-0" />
+      <AlertTriangle aria-hidden className="size-4 shrink-0" />
       {/* No ligatures: the font would draw the "-->" in a message as an arrow. */}
       <span className="min-w-0 truncate [font-variant-ligatures:none]">
         {current
@@ -553,7 +556,7 @@ function FileStatus({
         <button
           type="button"
           onClick={() => onReveal(next.line)}
-          className="shrink-0 rounded-sm font-medium underline underline-offset-4 outline-none hover:text-amber-900 focus-visible:ring-2 focus-visible:ring-ring/50 dark:hover:text-amber-300"
+          className="shrink-0 rounded-sm font-medium underline underline-offset-4 outline-none hover:text-amber-900 focus-visible:ring-2 focus-visible:ring-ring dark:hover:text-amber-300"
         >
           {current ? "Next" : "Show"}
         </button>

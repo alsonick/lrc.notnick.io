@@ -48,7 +48,7 @@ export function VolumeControl({ volume, onVolumeChange }: Props) {
             />
           }
         >
-          <Icon />
+          <Icon aria-hidden />
         </TooltipTrigger>
         <TooltipContent>{label}</TooltipContent>
       </Tooltip>

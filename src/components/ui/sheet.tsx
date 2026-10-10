@@ -71,7 +71,7 @@ function SheetContent({
               />
             }
           >
-            <X />
+            <X aria-hidden />
             <span className="sr-only">Close</span>
           </SheetPrimitive.Close>
         )}

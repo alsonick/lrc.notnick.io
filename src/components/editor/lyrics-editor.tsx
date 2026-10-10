@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { UNDO_TOAST_MS } from "@/lib/constants";
 import { downloadTextFile, stripExtension } from "@/lib/file";
 import {
   buildLrcFile,
@@ -151,6 +152,7 @@ export function LyricsEditor() {
     setLyricsText(restored);
     toast.success("Restored the original casing", {
       action: { label: "Undo", onClick: () => setLyricsText(before) },
+      duration: UNDO_TOAST_MS,
     });
   }
 
@@ -168,6 +170,7 @@ export function LyricsEditor() {
     setLyricsText(result.text);
     toast.success(describe(result.count), {
       action: { label: "Undo", onClick: () => setLyricsText(before) },
+      duration: UNDO_TOAST_MS,
     });
   }
 
@@ -177,6 +180,7 @@ export function LyricsEditor() {
     setResetOpen(false);
     toast("Editor cleared", {
       action: { label: "Undo", onClick: () => setLyricsText(before) },
+      duration: UNDO_TOAST_MS,
     });
   }
 
@@ -219,7 +223,7 @@ export function LyricsEditor() {
         </p>
       </div>
 
-      <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
+      <div className="overflow-hidden rounded-xl border bg-card shadow-sm transition-colors has-[textarea:focus-visible]:border-ring">
         <div className="flex flex-wrap items-center gap-2 border-b bg-muted/40 p-3">
           <Button
             variant="outline"
@@ -233,7 +237,7 @@ export function LyricsEditor() {
               )
             }
           >
-            <Scissors />
+            <Scissors aria-hidden />
             Strip sections
           </Button>
           <Button
@@ -247,7 +251,7 @@ export function LyricsEditor() {
               )
             }
           >
-            <Tag />
+            <Tag aria-hidden />
             Strip tags
           </Button>
           <Button
@@ -263,7 +267,7 @@ export function LyricsEditor() {
             }
             title="Remove asides in parentheses, like (Let's go)"
           >
-            <Code />
+            <Code aria-hidden />
             Strip ()
           </Button>
           <Button
@@ -278,7 +282,7 @@ export function LyricsEditor() {
               );
             }}
           >
-            <ChevronsDown />
+            <ChevronsDown aria-hidden />
             lowercase
           </Button>
           <Button
@@ -293,7 +297,7 @@ export function LyricsEditor() {
               );
             }}
           >
-            <ChevronsUp />
+            <ChevronsUp aria-hidden />
             UPPERCASE
           </Button>
           <Button
@@ -302,7 +306,7 @@ export function LyricsEditor() {
             onClick={restoreCase}
             title="Put the casing back the way the lyrics were pasted"
           >
-            <Type />
+            <Type aria-hidden />
             Original
           </Button>
           <Button
@@ -311,7 +315,7 @@ export function LyricsEditor() {
             onClick={() => setResetOpen(true)}
             className="ml-auto"
           >
-            <RotateCcw />
+            <RotateCcw aria-hidden />
             Reset
           </Button>
         </div>
@@ -331,7 +335,7 @@ export function LyricsEditor() {
         <div className="flex flex-wrap items-center justify-end gap-3 border-t bg-muted/40 p-3">
           <div className="flex flex-wrap items-center gap-2">
             <Button variant="outline" disabled={empty} onClick={copy}>
-              <Copy />
+              <Copy aria-hidden />
               Copy
             </Button>
             <Button
@@ -339,14 +343,14 @@ export function LyricsEditor() {
               disabled={stats.synced === 0}
               onClick={download}
             >
-              <Download />
+              <Download aria-hidden />
               Download .lrc
             </Button>
             <Button
               disabled={stats.lines === 0}
               onClick={() => router.push("/sync")}
             >
-              <Activity />
+              <Activity aria-hidden />
               Synchronize
             </Button>
           </div>

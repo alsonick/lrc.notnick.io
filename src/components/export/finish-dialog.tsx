@@ -76,7 +76,7 @@ export function FinishDialog({
             Cancel
           </DialogClose>
           <Button ref={editRef} onClick={onEdit}>
-            <Edit />
+            <Edit aria-hidden />
             Edit
           </Button>
         </DialogFooter>
@@ -97,7 +97,7 @@ function FileCard({
   return (
     <div className="flex min-w-0 flex-1 items-center gap-2.5 rounded-md bg-background px-2.5 py-2 shadow-xs ring-1 ring-foreground/10 dark:bg-input/30">
       <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/15 text-primary">
-        <Icon className="size-4" />
+        <Icon aria-hidden className="size-4" />
       </span>
       <div className="min-w-0">
         <p className="truncate font-mono text-xs font-medium" title={name}>

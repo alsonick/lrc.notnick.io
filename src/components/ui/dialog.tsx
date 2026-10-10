@@ -72,7 +72,7 @@ function DialogContent({
               />
             }
           >
-            <X
+            <X aria-hidden
             />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>

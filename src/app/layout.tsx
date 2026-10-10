@@ -159,8 +159,18 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             {/* The app is desktop-only: hidden below `sm`, where MobileNotice shows instead.
                 `app-shell` is how globals.css finds the page behind a dialog. */}
             <div className="app-shell hidden flex-1 flex-col sm:flex">
+              {/* First stop for the Tab key: past the header, into the page. */}
+              <a href="#main" className="skip-link">
+                Skip to content
+              </a>
               <SiteHeader />
-              <main className="flex flex-1 flex-col">{children}</main>
+              <main
+                id="main"
+                tabIndex={-1}
+                className="flex flex-1 flex-col outline-none"
+              >
+                {children}
+              </main>
               <Footer />
             </div>
           </TooltipProvider>
