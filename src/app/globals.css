@@ -201,6 +201,65 @@
   filter: blur(var(--blur-xs));
 }
 
+/* October's falling pumpkins (see decorations.ts). The overlay sits over the
+   page but under dialogs, and lets every click through. Each pumpkin carries
+   its own column, sideways drift and spin. */
+#pumpkins {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+/* How solid both decorations are: the slider in the settings. The second id
+   is the overlay December's snow script builds. Each fades in when it is
+   added, and out once decorations.ts marks it as leaving. Both take the same
+   time on the same curve, so swapping one for the other is an even
+   crossfade. */
+#pumpkins,
+#embedim--snow {
+  opacity: var(--decoration-opacity, 1);
+  animation: decoration-in 600ms ease-in-out;
+  will-change: opacity;
+}
+#pumpkins[data-leaving],
+#embedim--snow[data-leaving] {
+  opacity: 0;
+  transition: opacity 600ms ease-in-out;
+}
+/* The snow script puts itself above everything. It belongs where the
+   pumpkins are: over the page and under dialogs. */
+#embedim--snow {
+  z-index: 45 !important;
+}
+@keyframes decoration-in {
+  from {
+    opacity: 0;
+  }
+}
+#pumpkins span {
+  position: absolute;
+  top: -3rem;
+  left: 0;
+  line-height: 1;
+  animation: pumpkin-fall linear infinite;
+  will-change: transform;
+}
+@keyframes pumpkin-fall {
+  from {
+    transform: translate3d(var(--x), 0, 0) rotate(0deg);
+  }
+  to {
+    transform: translate3d(
+        calc(var(--x) + var(--drift)),
+        calc(100vh + 6rem),
+        0
+      )
+      rotate(var(--spin));
+  }
+}
+
 /* The first Tab stop on every page. Off screen until it has focus. */
 .skip-link {
   position: fixed;
@@ -261,7 +320,9 @@
    durations are tiny rather than zero so the end-of-animation events that
    close dialogs still fire. */
 @media (prefers-reduced-motion: reduce) {
-  *,
+  /* The decorations are left out: they only run here if someone picked one
+     in the settings, which is asking for it. */
+  *:not(#pumpkins *, #embedim--snow *),
   *::before,
   *::after {
     animation-duration: 0.01ms !important;

@@ -34,6 +34,40 @@ export function areShortcutsEnabled(): boolean {
   }
 }
 
+/** Where the "Decorations" switch is saved, as JSON `true` or `false`. */
+export const DECORATIONS_KEY = "lrc.notnick.io:decorations";
+
+/**
+ * Whether the seasonal decorations may be drawn, which they may unless
+ * someone switched them off. They never stop moving by themselves, so there
+ * has to be a way to stop them.
+ */
+export function areDecorationsEnabled(): boolean {
+  if (typeof window === "undefined") return true;
+  try {
+    return window.localStorage.getItem(DECORATIONS_KEY) !== "false";
+  } catch {
+    return true;
+  }
+}
+
+/** Where the decorations' opacity is saved, as a JSON number. */
+export const DECORATION_OPACITY_KEY = "lrc.notnick.io:decoration-opacity";
+/** Any fainter and the slider would just be a second off switch. */
+export const DECORATION_OPACITY_MIN = 0.1;
+
+/** How solid the decorations are drawn, from the minimum up to 1 (the default). */
+export function decorationOpacity(): number {
+  if (typeof window === "undefined") return 1;
+  try {
+    const saved = Number(window.localStorage.getItem(DECORATION_OPACITY_KEY));
+    // Nothing saved reads as 0, which is out of range like any other junk.
+    return saved >= DECORATION_OPACITY_MIN && saved <= 1 ? saved : 1;
+  } catch {
+    return 1;
+  }
+}
+
 const SETTINGS_EVENT = "lrc.notnick.io:settings";
 
 /** Tells the rest of the page that a setting was just saved. */

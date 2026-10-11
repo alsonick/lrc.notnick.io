@@ -33,7 +33,7 @@ function Slider({
           <SliderPrimitive.Thumb
             data-slot="slider-thumb"
             aria-label={ariaLabel}
-            className="size-3.5 rounded-full bg-white ring-1 ring-black/25 transition-[box-shadow] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary data-dragging:ring-2 data-dragging:ring-primary"
+            className="size-3.5 rounded-full bg-white ring-1 ring-black/25 transition-[box-shadow] has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring data-dragging:ring-2 data-dragging:ring-ring"
           />
         </SliderPrimitive.Track>
       </SliderPrimitive.Control>

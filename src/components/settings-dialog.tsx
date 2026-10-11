@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Settings } from "react-feather";
 import { toast } from "sonner";
 
+import { DecorationPicker } from "@/components/decoration-picker";
 import { ThemePicker } from "@/components/theme-picker";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,11 +17,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { usePersistedState } from "@/hooks/use-persisted-state";
+import { currentDecoration } from "@/lib/decorations";
 import {
   announceSettingsChange,
+  areDecorationsEnabled,
   areShortcutsEnabled,
+  DECORATION_OPACITY_KEY,
+  DECORATION_OPACITY_MIN,
+  decorationOpacity,
+  DECORATIONS_KEY,
   isLoggingEnabled,
   LOG_KEY,
   readTheme,
@@ -29,7 +37,7 @@ import {
 
 /** Every setting as it stands, to tell whether any of them was changed. */
 function readSettings(): string {
-  return `${readTheme()} ${isLoggingEnabled()} ${areShortcutsEnabled()}`;
+  return `${readTheme()} ${isLoggingEnabled()} ${areShortcutsEnabled()} ${areDecorationsEnabled()} ${decorationOpacity()} ${currentDecoration()}`;
 }
 
 /** Header button that opens the app's settings. Each one applies as it's changed. */
@@ -90,6 +98,11 @@ export function SettingsDialog({ className }: { className?: string }) {
 function SettingsList({ onNavigate }: { onNavigate: () => void }) {
   const [logging, setLogging] = usePersistedState(LOG_KEY, true);
   const [shortcuts, setShortcuts] = usePersistedState(SHORTCUTS_KEY, true);
+  const [decorations, setDecorations] = usePersistedState(
+    DECORATIONS_KEY,
+    true,
+  );
+  const [opacity, setOpacity] = usePersistedState(DECORATION_OPACITY_KEY, 1);
 
   return (
     <div className="divide-y">
@@ -131,7 +144,7 @@ function SettingsList({ onNavigate }: { onNavigate: () => void }) {
         />
       </label>
       {/* For speech input, where a stray word would otherwise press a key. */}
-      <label className="flex cursor-pointer items-center justify-between gap-4 pt-4">
+      <label className="flex cursor-pointer items-center justify-between gap-4 py-4">
         <SettingText
           id="settings-shortcuts"
           hintId="settings-shortcuts-hint"
@@ -148,6 +161,55 @@ function SettingsList({ onNavigate }: { onNavigate: () => void }) {
           aria-describedby="settings-shortcuts-hint"
         />
       </label>
+      <div className="space-y-3 pt-4">
+        {/* The pumpkins and the snow never stop on their own. */}
+        <label className="flex cursor-pointer items-center justify-between gap-4">
+          <SettingText
+            id="settings-decorations"
+            hintId="settings-decorations-hint"
+            title="Decorations"
+            hint="Show seasonal decorations?"
+          />
+          <Switch
+            checked={decorations}
+            onCheckedChange={(on) => {
+              setDecorations(on);
+              announceSettingsChange();
+            }}
+            aria-labelledby="settings-decorations"
+            aria-describedby="settings-decorations-hint"
+          />
+        </label>
+        {/* Applied as it's dragged, so the change shows behind the dialog. */}
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          <span>Opacity</span>
+          <Slider
+            value={opacity}
+            onValueChange={(value) => {
+              setOpacity(value);
+              announceSettingsChange();
+            }}
+            min={DECORATION_OPACITY_MIN}
+            max={1}
+            step={0.05}
+            largeStep={0.2}
+            format={{ style: "percent" }}
+            disabled={!decorations}
+            aria-label="Decorations opacity"
+            className="flex-1 [&_[data-slot=slider-indicator]]:bg-green-600 [&_[data-slot=slider-thumb]]:ring-foreground/60 [&_[data-slot=slider-track]]:bg-foreground/45"
+          />
+          <span className="w-9 text-right tabular-nums">
+            {Math.round(opacity * 100)}%
+          </span>
+        </div>
+        <DecorationPicker
+          enabled={decorations}
+          onEnabledChange={(on) => {
+            setDecorations(on);
+            announceSettingsChange();
+          }}
+        />
+      </div>
     </div>
   );
 }
