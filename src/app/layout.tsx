@@ -3,6 +3,7 @@ import { Geist_Mono, Inter } from "next/font/google";
 
 import { Footer } from "@/components/footer";
 import { MobileNotice } from "@/components/mobile-notice";
+import { SeasonalDecoration } from "@/components/seasonal-decoration";
 import { SiteHeader } from "@/components/site-header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { UnsavedLyricsGuard } from "@/components/unsaved-lyrics-guard";
@@ -177,6 +178,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <MobileNotice />
           <Toaster position="bottom-center" richColors />
           <UnsavedLyricsGuard />
+          <SeasonalDecoration />
         </ThemeProvider>
       </body>
     </html>

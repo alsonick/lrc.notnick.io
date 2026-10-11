@@ -6,6 +6,10 @@ import { RadioGroup } from "@base-ui/react/radio-group";
 import { Monitor, Moon, Sun } from "react-feather";
 import { useTheme } from "next-themes";
 
+import {
+  SEGMENTED_GROUP_CLASS,
+  SEGMENTED_ITEM_CLASS,
+} from "@/components/ui/segmented";
 import { cn } from "@/lib/utils";
 
 const OPTIONS = [
@@ -59,13 +63,13 @@ export function ThemePicker({
         choose(value as Theme, pointOf(details.event, groupRef.current))
       }
       aria-labelledby={labelledBy}
-      className={cn("grid grid-cols-3 gap-1 rounded-lg bg-muted p-1", className)}
+      className={cn(SEGMENTED_GROUP_CLASS, className)}
     >
       {OPTIONS.map((option) => (
         <Radio.Root
           key={option.value}
           value={option.value}
-          className="flex cursor-pointer items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium text-muted-foreground transition-colors outline-none select-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring data-checked:bg-background data-checked:text-foreground data-checked:shadow-xs dark:data-checked:bg-input/60 [&_svg]:size-4 [&_svg]:shrink-0"
+          className={SEGMENTED_ITEM_CLASS}
         >
           <option.icon aria-hidden />
           {option.label}
