@@ -94,14 +94,21 @@ function FileCard({
   name: string;
   detail: string;
 }) {
+  // A long name is cut short before its extension, which is the part that
+  // tells the two cards apart.
+  const dot = name.lastIndexOf(".");
+  const base = dot > 0 ? name.slice(0, dot) : name;
+  const extension = dot > 0 ? name.slice(dot) : "";
+
   return (
     <div className="flex min-w-0 flex-1 items-center gap-2.5 rounded-md bg-background px-2.5 py-2 shadow-xs ring-1 ring-foreground/10 dark:bg-input/30">
       <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/15 text-primary">
         <Icon aria-hidden className="size-4" />
       </span>
       <div className="min-w-0">
-        <p className="truncate font-mono text-xs font-medium" title={name}>
-          {name}
+        <p className="flex font-mono text-xs font-medium" title={name}>
+          <span className="truncate">{base}</span>
+          <span className="shrink-0">{extension}</span>
         </p>
         <p className="text-xs text-muted-foreground">{detail}</p>
       </div>
