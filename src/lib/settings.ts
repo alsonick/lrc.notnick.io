@@ -68,6 +68,36 @@ export function decorationOpacity(): number {
   }
 }
 
+/** Where the "Sound" switch is saved, as JSON `true` or `false`. */
+export const CLICK_SOUND_KEY = "lrc.notnick.io:click-sound";
+
+/** Whether the click on moving between pages is played. It is until switched off. */
+export function isClickSoundEnabled(): boolean {
+  if (typeof window === "undefined") return true;
+  try {
+    return window.localStorage.getItem(CLICK_SOUND_KEY) !== "false";
+  } catch {
+    return true;
+  }
+}
+
+/** Where the click's volume is saved, as a JSON number. */
+export const CLICK_VOLUME_KEY = "lrc.notnick.io:click-volume";
+/** Any quieter and the slider would just be a second off switch. */
+export const CLICK_VOLUME_MIN = 0.1;
+
+/** How loud the click is played, from the minimum up to 1 (the default). */
+export function clickVolume(): number {
+  if (typeof window === "undefined") return 1;
+  try {
+    const saved = Number(window.localStorage.getItem(CLICK_VOLUME_KEY));
+    // Nothing saved reads as 0, which is out of range like any other junk.
+    return saved >= CLICK_VOLUME_MIN && saved <= 1 ? saved : 1;
+  } catch {
+    return 1;
+  }
+}
+
 const SETTINGS_EVENT = "lrc.notnick.io:settings";
 
 /** Tells the rest of the page that a setting was just saved. */

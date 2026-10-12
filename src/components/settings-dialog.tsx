@@ -20,15 +20,21 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { usePersistedState } from "@/hooks/use-persisted-state";
+import { playClick } from "@/lib/click-sound";
 import { currentDecoration } from "@/lib/decorations";
 import {
   announceSettingsChange,
   areDecorationsEnabled,
   areShortcutsEnabled,
+  CLICK_SOUND_KEY,
+  CLICK_VOLUME_KEY,
+  CLICK_VOLUME_MIN,
+  clickVolume,
   DECORATION_OPACITY_KEY,
   DECORATION_OPACITY_MIN,
   decorationOpacity,
   DECORATIONS_KEY,
+  isClickSoundEnabled,
   isLoggingEnabled,
   LOG_KEY,
   readTheme,
@@ -37,7 +43,7 @@ import {
 
 /** Every setting as it stands, to tell whether any of them was changed. */
 function readSettings(): string {
-  return `${readTheme()} ${isLoggingEnabled()} ${areShortcutsEnabled()} ${areDecorationsEnabled()} ${decorationOpacity()} ${currentDecoration()}`;
+  return `${readTheme()} ${isLoggingEnabled()} ${areShortcutsEnabled()} ${areDecorationsEnabled()} ${decorationOpacity()} ${currentDecoration()} ${isClickSoundEnabled()} ${clickVolume()}`;
 }
 
 /** Header button that opens the app's settings. Each one applies as it's changed. */
@@ -72,7 +78,8 @@ export function SettingsDialog({ className }: { className?: string }) {
       >
         <Settings aria-hidden />
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      {/* Scrolls inside itself when the window is too short for every setting. */}
+      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-md">
         {/* The line under the title runs edge to edge, like the footer's. */}
         <DialogHeader className="-mx-4 border-b px-4 pb-4">
           <DialogTitle>Settings</DialogTitle>
@@ -103,6 +110,8 @@ function SettingsList({ onNavigate }: { onNavigate: () => void }) {
     true,
   );
   const [opacity, setOpacity] = usePersistedState(DECORATION_OPACITY_KEY, 1);
+  const [sound, setSound] = usePersistedState(CLICK_SOUND_KEY, true);
+  const [volume, setVolume] = usePersistedState(CLICK_VOLUME_KEY, 1);
 
   return (
     <div className="divide-y">
@@ -161,7 +170,7 @@ function SettingsList({ onNavigate }: { onNavigate: () => void }) {
           aria-describedby="settings-shortcuts-hint"
         />
       </label>
-      <div className="space-y-3 pt-4">
+      <div className="space-y-3 py-4">
         {/* The pumpkins and the snow never stop on their own. */}
         <label className="flex cursor-pointer items-center justify-between gap-4">
           <SettingText
@@ -209,6 +218,46 @@ function SettingsList({ onNavigate }: { onNavigate: () => void }) {
             announceSettingsChange();
           }}
         />
+      </div>
+      <div className="space-y-3 pt-4">
+        <label className="flex cursor-pointer items-center justify-between gap-4">
+          <SettingText
+            id="settings-sound"
+            hintId="settings-sound-hint"
+            title="Sound"
+            hint="Play a click when changing pages?"
+          />
+          <Switch
+            checked={sound}
+            onCheckedChange={(on) => {
+              setSound(on);
+              // Switching it on says what it sounds like.
+              if (on) playClick({ force: true });
+            }}
+            aria-labelledby="settings-sound"
+            aria-describedby="settings-sound-hint"
+          />
+        </label>
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          <span>Volume</span>
+          <Slider
+            value={volume}
+            onValueChange={setVolume}
+            // Once the thumb is let go, a click at the new level.
+            onValueCommitted={() => playClick()}
+            min={CLICK_VOLUME_MIN}
+            max={1}
+            step={0.05}
+            largeStep={0.2}
+            format={{ style: "percent" }}
+            disabled={!sound}
+            aria-label="Click volume"
+            className="flex-1 [&_[data-slot=slider-indicator]]:bg-green-600 [&_[data-slot=slider-thumb]]:ring-foreground/60 [&_[data-slot=slider-track]]:bg-foreground/45"
+          />
+          <span className="w-9 text-right tabular-nums">
+            {Math.round(volume * 100)}%
+          </span>
+        </div>
       </div>
     </div>
   );

@@ -210,7 +210,7 @@ export function LyricsEditor() {
     <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:py-10">
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <h1 className="text-2xl font-bold tracking-tight">
             Free Online LRC Generator
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">

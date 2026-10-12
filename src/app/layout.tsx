@@ -3,8 +3,10 @@ import { Geist_Mono, Inter } from "next/font/google";
 
 import { Footer } from "@/components/footer";
 import { MobileNotice } from "@/components/mobile-notice";
+import { NavigationSound } from "@/components/navigation-sound";
 import { SeasonalDecoration } from "@/components/seasonal-decoration";
 import { SiteHeader } from "@/components/site-header";
+import { SkipLink } from "@/components/skip-link";
 import { ThemeProvider } from "@/components/theme-provider";
 import { UnsavedLyricsGuard } from "@/components/unsaved-lyrics-guard";
 import { Toaster } from "@/components/ui/sonner";
@@ -160,10 +162,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             {/* The app is desktop-only: hidden below `sm`, where MobileNotice shows instead.
                 `app-shell` is how globals.css finds the page behind a dialog. */}
             <div className="app-shell hidden flex-1 flex-col sm:flex">
-              {/* First stop for the Tab key: past the header, into the page. */}
-              <a href="#main" className="skip-link">
-                Skip to content
-              </a>
+              <SkipLink />
               <SiteHeader />
               <main
                 id="main"
@@ -179,6 +178,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <Toaster position="bottom-center" richColors />
           <UnsavedLyricsGuard />
           <SeasonalDecoration />
+          <NavigationSound />
         </ThemeProvider>
       </body>
     </html>
