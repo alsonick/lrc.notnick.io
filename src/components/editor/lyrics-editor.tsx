@@ -17,6 +17,7 @@ import {
 import { toast } from "sonner";
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { FindReplace } from "@/components/editor/find-replace";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { UNDO_TOAST_MS } from "@/lib/constants";
@@ -41,6 +42,7 @@ import {
   useLyricsText,
   useOriginalCase,
 } from "@/lib/lyrics-store";
+import { replaceWords } from "@/lib/replace";
 import { reportDownload } from "@/lib/report-download";
 
 /**
@@ -172,6 +174,15 @@ export function LyricsEditor() {
       action: { label: "Undo", onClick: () => setLyricsText(before) },
       duration: UNDO_TOAST_MS,
     });
+  }
+
+  function replace(find: string, replacement: string) {
+    transform(
+      (input) => replaceWords(input, find, replacement),
+      (count) =>
+        `${replacement === "" ? "Removed" : "Replaced"} ${count} ${count === 1 ? "match" : "matches"}`,
+      "No matches found",
+    );
   }
 
   function reset() {
@@ -332,8 +343,13 @@ export function LyricsEditor() {
           className="h-[calc(max((100dvh-3.5rem)/2,24rem)-3.75rem)] field-sizing-fixed sm:h-[calc(max((100dvh-3.5rem)/2,24rem)-4.75rem)] resize-none overflow-y-auto rounded-none border-0 px-5 py-4 text-base leading-relaxed shadow-none placeholder:text-muted-foreground/50 focus-visible:ring-0 disabled:bg-transparent md:text-base dark:bg-transparent dark:disabled:bg-transparent"
         />
 
-        <div className="flex flex-wrap items-center justify-end gap-3 border-t bg-muted/40 p-3">
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t bg-muted/40 p-3">
+          <FindReplace
+            text={text}
+            disabled={empty || !hydrated}
+            onReplace={replace}
+          />
+          <div className="ml-auto flex flex-wrap items-center gap-2">
             <Button variant="outline" disabled={empty} onClick={copy}>
               <Copy aria-hidden />
               Copy
