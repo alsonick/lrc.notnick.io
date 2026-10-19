@@ -144,8 +144,8 @@ const STEPS: Step[] = [
     body: (
       <>
         Pause and click the dot in front of a line to clear it and everything
-        after it. Playback rewinds two seconds before that line so you can try
-        again.
+        after it. Playback goes back up to two seconds, never past the line
+        before, so you can try again.
       </>
     ),
   },

@@ -76,7 +76,7 @@ export function LyricRow({
             aria-label={`Undo from "${text}"`}
             title={
               rewindSeconds > 0
-                ? `Undo from here and rewind ${rewindSeconds}s before this line`
+                ? `Undo from here and rewind up to ${rewindSeconds}s, no further back than the line before`
                 : "Undo this line and everything after it"
             }
             className="group/dot flex size-6 shrink-0 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-white"

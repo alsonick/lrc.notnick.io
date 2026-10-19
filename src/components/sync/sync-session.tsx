@@ -57,11 +57,9 @@ import {
 } from "@/lib/lrc";
 import type { AudioSource } from "@/lib/lyrics-store";
 import { reportDownload } from "@/lib/report-download";
+import { REWIND_SECONDS, rewindPoint } from "@/lib/rewind";
 import { areShortcutsEnabled, subscribeToSettings } from "@/lib/settings";
 import { cn } from "@/lib/utils";
-
-/** How far playback rewinds before a line when that line is undone. */
-export const REWIND_SECONDS = 2;
 
 const ANTICIPATION_OPTIONS = [0, 0.25, 0.5, 0.75, 1, 1.5, 2, 3].map((s) => ({
   value: String(s),
@@ -280,12 +278,13 @@ export function SyncSession({
         ),
       );
       // Only real audio can rewind; music playing elsewhere cannot follow a
-      // stopwatch seek, so leave the clock alone in that mode.
+      // stopwatch seek, so leave the clock alone in that mode. Playback goes
+      // back no further than the line before, which is now the current one.
       if (stamp !== null && clock.usingAudio) {
-        seek(Math.max(0, stamp - REWIND_SECONDS));
+        seek(rewindPoint(lines, lineIndex, stamp, now()));
       }
     },
-    [clock.usingAudio, lines, onLinesChange, seek],
+    [clock.usingAudio, lines, now, onLinesChange, seek],
   );
 
   const undoLast = useCallback(() => {
