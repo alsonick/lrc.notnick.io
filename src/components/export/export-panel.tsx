@@ -29,6 +29,7 @@ import {
 } from "@/components/export/code-editor";
 import { lrcSyntax, srtSyntax } from "@/components/export/syntax";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,
@@ -55,6 +56,7 @@ import {
   LAST_CUE_SECONDS,
   lrcToSrtCues,
   parseSrt,
+  wrapSrtLines,
   type SrtIssue,
 } from "@/lib/srt";
 
@@ -123,6 +125,7 @@ function describeSrtIssue(issue: SrtIssue): string {
  * The panel Done opens on the right: an LRC file and the SRT it converts to,
  * both as editable text. The subtitles follow the LRC until they are edited
  * by hand; from then on they are their own text, until Revert rebuilds them.
+ * A max line length isn't a hand edit: it wraps them and they keep following.
  */
 export function ExportPanel({
   open,
@@ -143,6 +146,10 @@ export function ExportPanel({
   const [srtDraft, setSrtDraft] = useState<string | null>(null);
   /** The hand-edited subtitles as last downloaded, to know what's unsaved. */
   const [savedSrt, setSavedSrt] = useState<string | null>(null);
+  /** What's typed in the max line length box, applied or not. */
+  const [lineLength, setLineLength] = useState("");
+  /** The longest a subtitle line may be; null for no limit. */
+  const [maxLine, setMaxLine] = useState<number | null>(null);
   /** The editor being worked in, which the footer reports on. */
   const [side, setSide] = useState<Format>("lrc");
   const [lrcLine, setLrcLine] = useState(0);
@@ -162,6 +169,8 @@ export function ExportPanel({
       setDraft(text);
       setSrtDraft(null);
       setSavedSrt(null);
+      setLineLength("");
+      setMaxLine(null);
       setSide("lrc");
       setLrcLine(0);
       setSrtLine(0);
@@ -181,11 +190,16 @@ export function ExportPanel({
     [draft, duration],
   );
   // Without the file's closing line break, which would show as an empty line.
-  const derivedSrt = useMemo(
+  const plainSrt = useMemo(
     () => buildSrtFile(derivedCues).trimEnd(),
     [derivedCues],
   );
+  const derivedSrt = useMemo(
+    () => (maxLine === null ? plainSrt : wrapSrtLines(plainSrt, maxLine)),
+    [plainSrt, maxLine],
+  );
   const following = srtDraft === null;
+  const srtChanged = !following || maxLine !== null;
   const srtText = srtDraft ?? derivedSrt;
   const srt = useMemo(() => parseSrt(srtText), [srtText]);
   const srtIssueByLine = useMemo(
@@ -194,6 +208,13 @@ export function ExportPanel({
   );
   const edited = draft !== original;
   const srtUnsaved = srtDraft !== null && srtDraft !== savedSrt;
+  /** Null for an empty box, which clears the limit. */
+  const typedLength = lineLength === "" ? null : Number(lineLength);
+  // Text edited by hand can be wrapped again after more typing, but it can't
+  // be unwrapped: only a limit that's new means anything while following.
+  const canApplyLength =
+    typedLength !== 0 &&
+    (following ? typedLength !== maxLine : typedLength !== null);
 
   // While the subtitles follow the LRC, each of its lines makes one block, in
   // order, so the caret on one side points at a spot on the other.
@@ -271,7 +292,7 @@ export function ExportPanel({
         format === "lrc"
           ? countSyncable(parseLyrics(draft))
           : srt.cues.length,
-      edited: edited || (format === "srt" && !following),
+      edited: edited || (format === "srt" && srtChanged),
     });
   }
 
@@ -286,8 +307,25 @@ export function ExportPanel({
   }
 
   function revertSrt() {
-    if (srtRef.current) srtRef.current.replaceText(derivedSrt);
-    else setSrtDraft(null);
+    setLineLength("");
+    setMaxLine(null);
+    srtRef.current?.replaceText(plainSrt);
+    // After the swap, whose `changeSrt` still compares against the old limit.
+    setSrtDraft(null);
+  }
+
+  function applyLineLength() {
+    setMaxLine(typedLength);
+    setAnnouncement(
+      typedLength === null
+        ? "Subtitle lines are no longer wrapped"
+        : `Subtitle lines wrap at ${typedLength} characters`,
+    );
+    if (following || typedLength === null) return;
+    const next = wrapSrtLines(srtText, typedLength);
+    if (next === srtText) return;
+    if (srtRef.current) srtRef.current.replaceText(next);
+    else changeSrt(next);
   }
 
   /** A new subtitle after the one being worked on, or at the very end. */
@@ -368,15 +406,23 @@ export function ExportPanel({
             className="flex min-h-0 flex-col bg-muted/30 dark:bg-black/10"
           >
             <PaneHeader icon={Film} name={`${fileBase}.srt`}>
+              <LineLengthForm
+                value={lineLength}
+                canApply={canApplyLength}
+                onChange={setLineLength}
+                onApply={applyLineLength}
+              />
               <Button
                 variant="ghost"
                 size="sm"
-                disabled={following}
+                disabled={!srtChanged}
                 onClick={revertSrt}
                 title="Rebuild the subtitles from the .lrc, dropping the edits made here"
               >
                 <RotateCcw aria-hidden />
-                Revert
+                {/* Just the icon while the panes are side by side at their
+                    narrowest, so the file name keeps some room. */}
+                <span className="lg:max-xl:sr-only">Revert</span>
               </Button>
               <Button
                 variant="ghost"
@@ -385,9 +431,9 @@ export function ExportPanel({
                 title="Add a subtitle after this one. With no gap before the next, the two share this one's time."
               >
                 <Plus aria-hidden />
-                Add
+                <span className="lg:max-xl:sr-only">Add</span>
               </Button>
-              <span className="hidden text-xs text-muted-foreground tabular-nums xl:inline">
+              <span className="hidden text-xs text-muted-foreground tabular-nums min-[90rem]:inline">
                 {srt.cues.length}{" "}
                 {srt.cues.length === 1 ? "subtitle" : "subtitles"}
               </span>
@@ -509,6 +555,65 @@ function PaneHeader({
       </span>
       <div className="ml-auto flex shrink-0 items-center gap-2">{children}</div>
     </div>
+  );
+}
+
+/**
+ * Sets the longest a subtitle line may be: one bordered control, a box for
+ * the number joined to the button that applies it, as tall as the buttons
+ * beside it. See `wrapSubtitleLine` for how lines break.
+ */
+function LineLengthForm({
+  value,
+  canApply,
+  onChange,
+  onApply,
+}: {
+  value: string;
+  canApply: boolean;
+  onChange: (value: string) => void;
+  onApply: () => void;
+}) {
+  return (
+    <form
+      aria-label="Max line length"
+      title="The most characters a subtitle line can have. Anything past that moves to the next line."
+      onSubmit={(event) => {
+        // Enter in the box does the same as the button.
+        event.preventDefault();
+        if (canApply) onApply();
+      }}
+      className="flex h-7 items-stretch overflow-hidden rounded-[min(var(--radius-md),12px)] border border-input bg-background transition-colors has-[input:focus-visible]:border-ring has-[input:focus-visible]:ring-3 has-[input:focus-visible]:ring-ring dark:bg-input/30"
+    >
+      <div className="relative border-r border-input">
+        <Input
+          value={value}
+          onChange={(event) => onChange(event.target.value.replace(/\D/g, ""))}
+          placeholder="Max length"
+          aria-label="Max line length, in characters"
+          inputMode="numeric"
+          maxLength={3}
+          autoComplete="off"
+          className="peer h-full w-22 rounded-none border-0 text-[0.8rem] tabular-nums not-placeholder-shown:pr-11 focus-visible:ring-0 md:text-[0.8rem] dark:bg-transparent"
+        />
+        {/* Says what the number means, once the placeholder is gone. */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-xs text-muted-foreground peer-placeholder-shown:hidden"
+        >
+          chars
+        </span>
+      </div>
+      <Button
+        type="submit"
+        variant="ghost"
+        size="sm"
+        disabled={!canApply}
+        className="h-full rounded-none focus-visible:ring-inset"
+      >
+        Apply
+      </Button>
+    </form>
   );
 }
 

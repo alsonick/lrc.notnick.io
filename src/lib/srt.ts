@@ -320,3 +320,86 @@ export function addSrtCue(
   });
   return { text: lines.join("\n"), line: textLine };
 }
+
+const WORD_SEGMENTER = new Intl.Segmenter(undefined, { granularity: "word" });
+const CHARACTER_SEGMENTER = new Intl.Segmenter(undefined, {
+  granularity: "grapheme",
+});
+
+/** What a reader sees as characters, so an emoji is never cut in two. */
+function characters(text: string): string[] {
+  return Array.from(CHARACTER_SEGMENTER.segment(text), (part) => part.segment);
+}
+
+function charCount(text: string): number {
+  return characters(text).length;
+}
+
+/** The words in a run of text, each with the punctuation that follows it. */
+function splitWords(text: string): string[] {
+  const words: string[] = [];
+  for (const { segment, isWordLike } of WORD_SEGMENTER.segment(text)) {
+    if (isWordLike || words.length === 0) words.push(segment);
+    else words[words.length - 1] += segment;
+  }
+  return words;
+}
+
+/** Cuts a word into pieces of `max` characters, the last perhaps shorter. */
+function cutWord(word: string, max: number): string[] {
+  const chars = characters(word);
+  const pieces: string[] = [];
+  for (let at = 0; at < chars.length; at += max) {
+    pieces.push(chars.slice(at, at + max).join(""));
+  }
+  return pieces;
+}
+
+/**
+ * Breaks a line of subtitle text into lines of at most `max` characters, which
+ * must be at least 1, filling each before starting the next. Lines break at
+ * spaces, or between words in text written without them, such as Japanese.
+ * Only a word too long for a line of its own is cut.
+ */
+export function wrapSubtitleLine(line: string, max: number): string[] {
+  if (charCount(line) <= max) return [line];
+  const rows: string[] = [];
+  let row = "";
+  const add = (gap: string, piece: string) => {
+    if (row === "") {
+      row = piece;
+    } else if (charCount(row + gap + piece) <= max) {
+      row += gap + piece;
+    } else {
+      rows.push(row);
+      row = piece;
+    }
+  };
+  for (const [, gap, word] of line.trim().matchAll(/(\s*)(\S+)/g)) {
+    if (charCount(word) <= max) {
+      add(gap, word);
+    } else {
+      splitWords(word)
+        .flatMap((part) => cutWord(part, max))
+        .forEach((part, index) => add(index === 0 ? gap : "", part));
+    }
+  }
+  rows.push(row);
+  return rows;
+}
+
+/**
+ * Wraps the text of every subtitle with `wrapSubtitleLine`. Each stays in its
+ * own block, so its times don't change, and lines already short enough are
+ * left as they are rather than joined up. Everything else is kept as written.
+ */
+export function wrapSrtLines(text: string, max: number): string {
+  const { kinds } = parseSrt(text);
+  return text
+    .replace(/\r\n?/g, "\n")
+    .split("\n")
+    .flatMap((line, index) =>
+      kinds[index] === "text" ? wrapSubtitleLine(line, max) : [line],
+    )
+    .join("\n");
+}

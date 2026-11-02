@@ -128,6 +128,12 @@ the subtitle side it rebuilds them from the `.lrc`. Hand edits to the
 subtitles only exist in the panel, so closing it before you have downloaded
 them asks first.
 
+**Max length** caps how many characters a subtitle line can have. Longer lines
+wrap onto the next row inside the same subtitle, so their times stay put. They
+break at a space where they can, and a word is only cut if it is too long for a
+row by itself. The subtitles keep following the `.lrc` while they are wrapped,
+and **Revert** or clearing the box takes the limit off.
+
 ### How an .lrc becomes an .srt
 
 - Each subtitle stays up until the next line starts.
