@@ -62,6 +62,7 @@ import {
 import type { AudioSource } from "@/lib/lyrics-store";
 import { reportDownload } from "@/lib/report-download";
 import { REWIND_SECONDS, rewindPoint } from "@/lib/rewind";
+import { LAST_CUE_SECONDS } from "@/lib/srt";
 import { areShortcutsEnabled, subscribeToSettings } from "@/lib/settings";
 import { cn } from "@/lib/utils";
 
@@ -73,9 +74,6 @@ const COUNTDOWN_OPTIONS = [0, 3, 5, 10].map((s) => ({
   value: String(s),
   label: `${s}s`,
 }));
-
-const END_ON_DONE_DESCRIPTION =
-  "When on, the last line ends the moment you press Done. When off, or once the song is over, it lasts until the song ends.";
 
 /** Green highlight for the button that finishes the job once every line is stamped. */
 const READY_CLASS =
@@ -556,6 +554,19 @@ export function SyncSession({
     .filter(Boolean)
     .join(" · ");
 
+  // The End on Done switch's tooltip: how long the last line lasts without
+  // it, which is as long as the audio, when there's audio to measure.
+  let endOnDoneHint: string;
+  if (song) {
+    const end =
+      song.duration !== null && Number.isFinite(song.duration)
+        ? `, at ${formatClock(song.duration)}`
+        : "";
+    endOnDoneHint = `When off, the last line lasts until the audio ends${end}. Clicking "Done" after it has ended does the same.`;
+  } else {
+    endOnDoneHint = `When off, the last line lasts until the audio ends. With no audio to measure, the .srt gives it ${LAST_CUE_SECONDS} seconds.`;
+  }
+
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       {audio ? (
@@ -738,7 +749,7 @@ export function SyncSession({
             <ToolbarSwitch
               checked={endOnDone}
               onCheckedChange={setEndOnDone}
-              description={END_ON_DONE_DESCRIPTION}
+              description={endOnDoneHint}
             >
               End last line on &quot;Done&quot;
             </ToolbarSwitch>
