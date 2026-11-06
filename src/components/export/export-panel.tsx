@@ -2,6 +2,7 @@
 
 import {
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -27,6 +28,7 @@ import {
   CodeEditor,
   type CodeEditorHandle,
 } from "@/components/export/code-editor";
+import { PaneSplit } from "@/components/export/pane-split";
 import { lrcSyntax, srtSyntax } from "@/components/export/syntax";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -139,6 +141,7 @@ export function ExportPanel({
 }: Props) {
   const lrcRef = useRef<CodeEditorHandle>(null);
   const srtRef = useRef<CodeEditorHandle>(null);
+  const lrcPaneId = useId();
   /** The file as it was when the panel opened. */
   const [original, setOriginal] = useState("");
   const [draft, setDraft] = useState("");
@@ -363,8 +366,13 @@ export function ExportPanel({
           </div>
         </div>
 
-        <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,3fr)_minmax(0,2fr)] lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:grid-rows-1">
+        <PaneSplit
+          label="Resize the LRC and SRT files"
+          controls={lrcPaneId}
+          className="flex-1"
+        >
           <section
+            id={lrcPaneId}
             aria-label="LRC file"
             className="flex min-h-0 flex-col border-b lg:border-r lg:border-b-0"
           >
@@ -401,9 +409,11 @@ export function ExportPanel({
             />
           </section>
 
+          {/* A container, so its header fits itself to however wide the
+              divider leaves it. */}
           <section
             aria-label="SRT file"
-            className="flex min-h-0 flex-col bg-muted/30 dark:bg-black/10"
+            className="@container flex min-h-0 flex-col bg-muted/30 dark:bg-black/10"
           >
             <PaneHeader icon={Film} name={`${fileBase}.srt`}>
               <LineLengthForm
@@ -420,9 +430,9 @@ export function ExportPanel({
                 title="Rebuild the subtitles from the .lrc, dropping the edits made here"
               >
                 <RotateCcw aria-hidden />
-                {/* Just the icon while the panes are side by side at their
-                    narrowest, so the file name keeps some room. */}
-                <span className="lg:max-xl:sr-only">Revert</span>
+                {/* Just the icon while the pane is narrow, so the file name
+                    keeps some room. */}
+                <span className="@max-[31rem]:sr-only">Revert</span>
               </Button>
               <Button
                 variant="ghost"
@@ -431,9 +441,9 @@ export function ExportPanel({
                 title="Add a subtitle after this one. With no gap before the next, the two share this one's time."
               >
                 <Plus aria-hidden />
-                <span className="lg:max-xl:sr-only">Add</span>
+                <span className="@max-[31rem]:sr-only">Add</span>
               </Button>
-              <span className="hidden text-xs text-muted-foreground tabular-nums min-[90rem]:inline">
+              <span className="hidden text-xs text-muted-foreground tabular-nums @min-[35rem]:inline">
                 {srt.cues.length}{" "}
                 {srt.cues.length === 1 ? "subtitle" : "subtitles"}
               </span>
@@ -485,7 +495,7 @@ export function ExportPanel({
               </p>
             )}
           </section>
-        </div>
+        </PaneSplit>
 
         <div className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-t bg-muted/40 px-5 py-3">
           {/* Stays mounted, so a screen reader hears the message change. */}
@@ -589,12 +599,12 @@ function LineLengthForm({
         <Input
           value={value}
           onChange={(event) => onChange(event.target.value.replace(/\D/g, ""))}
-          placeholder="Max length"
+          placeholder="Max Length"
           aria-label="Max line length, in characters"
           inputMode="numeric"
           maxLength={3}
           autoComplete="off"
-          className="peer h-full w-22 rounded-none border-0 text-[0.8rem] tabular-nums not-placeholder-shown:pr-11 focus-visible:ring-0 md:text-[0.8rem] dark:bg-transparent"
+          className="peer h-full w-24 rounded-none border-0 text-[0.8rem] tabular-nums not-placeholder-shown:pr-11 focus-visible:ring-0 md:text-[0.8rem] dark:bg-transparent"
         />
         {/* Says what the number means, once the placeholder is gone. */}
         <span
