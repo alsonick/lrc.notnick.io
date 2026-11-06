@@ -28,6 +28,8 @@ export type Clock = {
   usingAudio: boolean;
   /** Exact current position, safe to call from event handlers. */
   now: () => number;
+  /** Whether the audio has played to its end. Never, for the stopwatch. */
+  hasEnded: () => boolean;
   play: () => Promise<void>;
   pause: () => void;
   seek: (seconds: number) => void;
@@ -69,6 +71,11 @@ export function useClock(audioUrl: string | null, volume = 1): Clock {
       ? base
       : base + (performance.now() - startedAt) / 1000;
   }, [usingAudio]);
+
+  const hasEnded = useCallback(
+    () => usingAudio && (audioRef.current?.ended ?? false),
+    [usingAudio],
+  );
 
   const play = useCallback(async () => {
     if (usingAudio) {
@@ -156,6 +163,7 @@ export function useClock(audioUrl: string | null, volume = 1): Clock {
     error,
     usingAudio,
     now,
+    hasEnded,
     play,
     pause,
     seek,

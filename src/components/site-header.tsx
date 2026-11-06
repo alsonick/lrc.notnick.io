@@ -154,7 +154,9 @@ const STEPS: Step[] = [
     title: "Save the file",
     body: (
       <>
-        Stamp the last line and hit <strong>Done</strong>.{" "}
+        Stamp the last line and hit <strong>Done</strong>. The last line lasts
+        until the song ends, or switch on <strong>End last line on Done</strong>{" "}
+        to end it right as you press Done.{" "}
         <strong>Edit</strong> lets you polish the file and save it as .lrc or
         as .srt subtitles; <strong>Cancel</strong> downloads the .lrc as it is.
         Keep it next to your audio with the same name so players pick it up.

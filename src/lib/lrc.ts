@@ -271,6 +271,55 @@ export function countSynced(lines: LyricLine[]): number {
   return lines.filter((line) => isLyric(line) && line.time !== null).length;
 }
 
+/**
+ * Where the stamp that ends the last line is: a time tag on a line of its
+ * own, after every line of lyrics. -1 when there's none, and the last line
+ * then lasts until the song ends.
+ */
+export function findEndStamp(lines: readonly LyricLine[]): number {
+  for (let index = lines.length - 1; index >= 0; index -= 1) {
+    const { text, time } = lines[index];
+    // Lyrics or metadata come last, so nothing ends them.
+    if (text !== "") return -1;
+    if (time !== null) {
+      return lines.slice(0, index).some(isLyric) ? index : -1;
+    }
+  }
+  return -1;
+}
+
+/**
+ * The lyrics with their last line ending at `time`, in seconds, or lasting
+ * until the song ends when `time` is null. A stamp that ended it before is
+ * replaced, and blank lines after the lyrics are dropped so the new stamp
+ * comes straight after them.
+ */
+export function setEndStamp(
+  lines: readonly LyricLine[],
+  time: number | null,
+): LyricLine[] {
+  const at = findEndStamp(lines);
+  let keep = at === -1 ? lines.length : at;
+  while (keep > 0 && lines[keep - 1].text === "" && lines[keep - 1].time === null) {
+    keep -= 1;
+  }
+  const kept = lines.slice(0, keep);
+  return time === null ? kept : [...kept, { text: "", time }];
+}
+
+/**
+ * Clears the stamps from line `from` on. A stamp ending the last line is
+ * removed rather than cleared, or it would stay behind as an empty line.
+ */
+export function clearStamps(
+  lines: readonly LyricLine[],
+  from: number,
+): LyricLine[] {
+  return setEndStamp(lines, null).map((line, index) =>
+    index >= from ? { ...line, time: null } : line,
+  );
+}
+
 /*
  * Raw LRC text, as edited line by line in the export panel. Unlike
  * `parseLyrics`, these keep every time tag on a line and never reformat it.
