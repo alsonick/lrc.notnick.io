@@ -27,6 +27,7 @@ import { ExportPanel } from "@/components/export/export-panel";
 import { FinishDialog } from "@/components/export/finish-dialog";
 import { LyricRow, type LineState } from "@/components/sync/lyric-row";
 import { ToolbarButton } from "@/components/sync/toolbar-button";
+import { ToolbarSwitch } from "@/components/sync/toolbar-switch";
 import { VolumeControl } from "@/components/sync/volume-control";
 import { Kbd } from "@/components/ui/kbd";
 import {
@@ -48,16 +49,20 @@ import { UNDO_TOAST_MS } from "@/lib/constants";
 import { downloadTextFile, stripExtension } from "@/lib/file";
 import {
   buildLrcFile,
+  clearStamps,
+  findEndStamp,
   formatClock,
   isLyric,
   parseLyrics,
   serializeLyrics,
+  setEndStamp,
   trimBlankEdges,
   type LyricLine,
 } from "@/lib/lrc";
 import type { AudioSource } from "@/lib/lyrics-store";
 import { reportDownload } from "@/lib/report-download";
 import { REWIND_SECONDS, rewindPoint } from "@/lib/rewind";
+import { LAST_CUE_SECONDS } from "@/lib/srt";
 import { areShortcutsEnabled, subscribeToSettings } from "@/lib/settings";
 import { cn } from "@/lib/utils";
 
@@ -115,7 +120,7 @@ export function SyncSession({
     1,
   );
   const clock = useClock(audio?.url ?? null, volume);
-  const { isPlaying, now, play, pause, seek } = clock;
+  const { isPlaying, now, hasEnded, play, pause, seek } = clock;
   const [anticipation, setAnticipation] = usePersistedState<number>(
     "lrc.notnick.io:anticipation",
     0,
@@ -123,6 +128,11 @@ export function SyncSession({
   const [countdownSeconds, setCountdownSeconds] = usePersistedState<number>(
     "lrc.notnick.io:countdown",
     0,
+  );
+  /** Whether Done ends the last line, rather than leaving it to the end of the song. */
+  const [endOnDone, setEndOnDone] = usePersistedState<boolean>(
+    "lrc.notnick.io:end-on-done",
+    false,
   );
   const [countdown, setCountdown] = useState<number | null>(null);
   const [resetOpen, setResetOpen] = useState(false);
@@ -167,6 +177,9 @@ export function SyncSession({
     }
     return count;
   }, [lines, syncable]);
+
+  /** The stamp ending the last line, if Done (or the file) gave it one; -1 if not. */
+  const endIndex = useMemo(() => findEndStamp(lines), [lines]);
 
   const done = cursor >= syncable.length;
   const currentLine = cursor > 0 ? syncable[cursor - 1] : null;
@@ -240,12 +253,33 @@ export function SyncSession({
   }, [pause]);
 
   /**
+   * With End on Done, the last line ends where Done is pressed, moved earlier
+   * by the anticipation like every other stamp. Once the song is over it
+   * lasts until the end instead. A press from before the last line started
+   * (the song was played again from the top, say) leaves things as they are.
+   */
+  const endLastLine = useCallback(() => {
+    const last = lines[syncable[syncable.length - 1]]?.time ?? null;
+    if (last === null) return;
+    let end: number | null = null;
+    if (!hasEnded()) {
+      end = now() - anticipation;
+      // In hundredths, as the file has it: no later than the line's own
+      // start, the stamp wouldn't end it, and players would skip it.
+      if (Math.round(end * 100) <= Math.round(last * 100)) return;
+    }
+    const next = setEndStamp(lines, end);
+    if (serializeLyrics(next) !== serializeLyrics(lines)) onLinesChange(next);
+  }, [anticipation, hasEnded, lines, now, onLinesChange, syncable]);
+
+  /**
    * Stamps the current line. Once every line is stamped the same button reads
    * "Done", and that extra press is what offers the file, so a mistimed last
    * line can still be undone before anything is saved.
    */
   const nextLine = useCallback(() => {
     if (done) {
+      if (endOnDone) endLastLine();
       finish();
       return;
     }
@@ -261,6 +295,8 @@ export function SyncSession({
     anticipation,
     cursor,
     done,
+    endLastLine,
+    endOnDone,
     finish,
     isPlaying,
     lines,
@@ -272,11 +308,7 @@ export function SyncSession({
   const undoFrom = useCallback(
     (lineIndex: number) => {
       const stamp = lines[lineIndex]?.time ?? null;
-      onLinesChange(
-        lines.map((line, index) =>
-          index >= lineIndex ? { ...line, time: null } : line,
-        ),
-      );
+      onLinesChange(clearStamps(lines, lineIndex));
       // Only real audio can rewind; music playing elsewhere cannot follow a
       // stopwatch seek, so leave the clock alone in that mode. Playback goes
       // back no further than the line before, which is now the current one.
@@ -287,9 +319,11 @@ export function SyncSession({
     [clock.usingAudio, lines, now, onLinesChange, seek],
   );
 
+  /** Undoes the latest stamp: the end of the last line, if it has one. */
   const undoLast = useCallback(() => {
-    if (currentLine !== null) undoFrom(currentLine);
-  }, [currentLine, undoFrom]);
+    const target = endIndex !== -1 ? endIndex : currentLine;
+    if (target !== null) undoFrom(target);
+  }, [currentLine, endIndex, undoFrom]);
 
   /** Applies an inline edit. Blank text is treated as "leave it alone". */
   const commitEdit = useCallback(
@@ -430,7 +464,7 @@ export function SyncSession({
   }, [isPlaying, nextLine, shortcuts, togglePlayback, undoLast]);
 
   function resetAll() {
-    onLinesChange(lines.map((line) => ({ ...line, time: null })));
+    onLinesChange(clearStamps(lines, 0));
     setCountdown(null);
     pause();
     seek(0);
@@ -466,6 +500,7 @@ export function SyncSession({
   }
 
   function stateFor(index: number): LineState {
+    if (index === endIndex) return "end";
     const pos = position.get(index);
     if (pos === undefined) return lines[index].text === "" ? "blank" : "meta";
     if (pos >= cursor) return "upcoming";
@@ -499,10 +534,14 @@ export function SyncSession({
     startLabel = started ? "Continue" : "Start";
   }
 
-  const upNext =
-    cursor < syncable.length
-      ? `Next, line ${cursor + 1} of ${syncable.length}: ${lines[syncable[cursor]].text}`
-      : "Every line is stamped. Press Done to finish.";
+  let upNext: string;
+  if (cursor < syncable.length) {
+    upNext = `Next, line ${cursor + 1} of ${syncable.length}: ${lines[syncable[cursor]].text}`;
+  } else if (endOnDone) {
+    upNext = "Every line is stamped. Press Done as the last line ends.";
+  } else {
+    upNext = "Every line is stamped. Press Done to finish.";
+  }
 
   const status = [
     `${cursor} / ${syncable.length} lines`,
@@ -514,6 +553,19 @@ export function SyncSession({
   ]
     .filter(Boolean)
     .join(" · ");
+
+  // The End on Done switch's tooltip: how long the last line lasts without
+  // it, which is as long as the audio, when there's audio to measure.
+  let endOnDoneHint: string;
+  if (song) {
+    const end =
+      song.duration !== null && Number.isFinite(song.duration)
+        ? `, at ${formatClock(song.duration)}`
+        : "";
+    endOnDoneHint = `When off, the last line lasts until the audio ends${end}. Clicking "Done" after it has ended does the same.`;
+  } else {
+    endOnDoneHint = `When off, the last line lasts until the audio ends. With no audio to measure, the .srt gives it ${LAST_CUE_SECONDS} seconds.`;
+  }
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -663,11 +715,15 @@ export function SyncSession({
               ref={nextButtonRef}
               onClick={nextLine}
               disabled={!done && !isPlaying}
-              data-stamps={done ? undefined : ""}
+              // Done stamps too while the song plays with End on Done, so it
+              // also stamps on the way down. Paused, it keeps its own keys.
+              data-stamps={!done || (endOnDone && isPlaying) ? "" : undefined}
               title={
-                done
-                  ? "Download the .lrc, or edit it and convert it to .srt"
-                  : undefined
+                !done
+                  ? undefined
+                  : endOnDone
+                    ? "End the last line here, then download the .lrc or edit it and convert it to .srt"
+                    : "Download the .lrc, or edit it and convert it to .srt"
               }
               className={cn(
                 "min-w-28 flex-1 rounded-l-none border-l-0",
@@ -688,7 +744,15 @@ export function SyncSession({
             </ToolbarButton>
           </div>
 
+          {/* Under Done once the toolbar wraps, which is what it changes. */}
           <div className="ml-auto flex items-center gap-3">
+            <ToolbarSwitch
+              checked={endOnDone}
+              onCheckedChange={setEndOnDone}
+              description={endOnDoneHint}
+            >
+              End last line on &quot;Done&quot;
+            </ToolbarSwitch>
             <span className="hidden text-xs text-neutral-400 tabular-nums lg:inline">
               {status}
             </span>

@@ -10,8 +10,17 @@ import {
 import { formatTime } from "@/lib/lrc";
 import { cn } from "@/lib/utils";
 
-/** `meta` is a metadata line such as `[ar: Artist]`, which never gets a stamp. */
-export type LineState = "blank" | "meta" | "upcoming" | "done" | "current";
+/**
+ * `meta` is a metadata line such as `[ar: Artist]`, which never gets a stamp.
+ * `end` is a stamp on its own after the last line, which ends that line.
+ */
+export type LineState =
+  | "blank"
+  | "meta"
+  | "upcoming"
+  | "done"
+  | "current"
+  | "end";
 
 type Props = {
   index: number;
@@ -46,6 +55,32 @@ export function LyricRow({
   onCancel,
 }: Props) {
   if (state === "blank") return <li aria-hidden className="h-3" />;
+  if (state === "end") {
+    // Lined up with the lyrics above, but quieter: it's a time, not a line.
+    return (
+      <li className="flex items-center gap-2 px-2 py-1 text-sm font-medium text-white/60">
+        <span className="flex w-5 shrink-0 items-center justify-center">
+          {showDot ? (
+            <UndoDot
+              label="Undo the end of the last line"
+              title={
+                rewindSeconds > 0
+                  ? `Undo the end and rewind up to ${rewindSeconds}s, no further back than the last line`
+                  : "Undo the end of the last line"
+              }
+              onClick={onUndo}
+            />
+          ) : null}
+        </span>
+        <span className="min-w-0 flex-1">End</span>
+        {time !== null ? (
+          <span className="shrink-0 font-mono text-xs font-normal text-white/70 tabular-nums">
+            {formatTime(time)}
+          </span>
+        ) : null}
+      </li>
+    );
+  }
   if (state === "meta") {
     return (
       <li className="flex items-center gap-2 px-2 font-mono text-xs text-white/65">
@@ -70,22 +105,15 @@ export function LyricRow({
     >
       <span className="flex w-5 shrink-0 items-center justify-center">
         {showDot && stamped ? (
-          <button
-            type="button"
-            onClick={onUndo}
-            aria-label={`Undo from "${text}"`}
+          <UndoDot
+            label={`Undo from "${text}"`}
             title={
               rewindSeconds > 0
                 ? `Undo from here and rewind up to ${rewindSeconds}s, no further back than the line before`
                 : "Undo this line and everything after it"
             }
-            className="group/dot flex size-6 shrink-0 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-white"
-          >
-            <span
-              aria-hidden
-              className="size-2.5 rounded-full bg-primary shadow-sm transition-all group-hover/dot:scale-150 group-hover/dot:bg-rose-400"
-            />
-          </button>
+            onClick={onUndo}
+          />
         ) : null}
       </span>
       {editing ? (
@@ -108,6 +136,32 @@ export function LyricRow({
         </span>
       ) : null}
     </li>
+  );
+}
+
+/** The dot in front of a stamp that clears it, and every stamp after it. */
+function UndoDot({
+  label,
+  title,
+  onClick,
+}: {
+  label: string;
+  title: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      title={title}
+      className="group/dot flex size-6 shrink-0 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-white"
+    >
+      <span
+        aria-hidden
+        className="size-2.5 rounded-full bg-primary shadow-sm transition-all group-hover/dot:scale-150 group-hover/dot:bg-rose-400"
+      />
+    </button>
   );
 }
 
