@@ -61,6 +61,7 @@ export function Footer() {
             <FooterColumn title="Product">
               <FooterLink href="/sync">Synchronize</FooterLink>
               <FooterLink href="/assets">Assets</FooterLink>
+              <FooterLink href="/usage">Usage</FooterLink>
               <FooterLink href="/">Editor</FooterLink>
             </FooterColumn>
             <FooterColumn title="Support">

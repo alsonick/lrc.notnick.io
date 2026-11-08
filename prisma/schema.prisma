@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+// The connection string is in prisma.config.ts (from DATABASE_URL).
+datasource db {
+  provider = "postgresql"
+}
+
+enum DownloadFormat {
+  lrc
+  srt
+}
+
+/// Where the lyrics came from: synced here, the editor as it is, or an uploaded .lrc.
+enum DownloadSource {
+  sync
+  editor
+  upload
+}
+
+/// One file saved from the site. Only what the download log already reports
+/// is kept, and nothing is stored for visitors who switched logging off: their
+/// saves only add to the Count.
+model Download {
+  id        Int            @id @default(autoincrement())
+  format    DownloadFormat
+  source    DownloadSource
+  createdAt DateTime       @default(now())
+}
+
+/// How many requests the site has served, shown as "Requests served" on
+/// /usage: one for each .lrc or .srt saved. A single row (`COUNT_ID` in
+/// src/lib/db.ts), made by the first migration.
+model Count {
+  id        Int      @id @default(1)
+  /// Where the count starts.
+  value     Int      @default(165)
+  updatedAt DateTime @updatedAt
+}

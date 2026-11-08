@@ -9,7 +9,7 @@ const description = `What ${SITE_NAME} keeps in your browser, what it logs, and 
 
 const EFFECTIVE_DATE = "8 Oct 2026";
 /** Change this whenever the policy's substance changes. */
-const LAST_UPDATED = "8 Oct 2026";
+const LAST_UPDATED = "8 Nov 2026";
 const CONTACT_EMAIL = "hi@notnick.io";
 
 export const metadata: Metadata = {
@@ -31,8 +31,9 @@ export const metadata: Metadata = {
 
 /**
  * The privacy policy. It describes what the code does, so it has to change
- * with it: the download log's fields live in `src/lib/session-log.ts` and the
- * feedback form's in `src/lib/feedback.ts`.
+ * with it: the download log's fields live in `src/lib/session-log.ts`, the
+ * feedback form's in `src/lib/feedback.ts` and the review form's in
+ * `src/lib/review.ts`.
  */
 export default function Page() {
   return (
@@ -63,9 +64,15 @@ export default function Page() {
           <p>
             You can turn this off at any time: open <Strong>Settings</Strong>{" "}
             (the gear icon in the header) and switch <Strong>Log</Strong> off.
-            From then on, nothing more is logged from that browser. Your
-            choice is saved in your browser, and you can switch it back on
-            whenever you like.
+            From then on, nothing more is logged from that browser. The only
+            thing still sent is a note that a file was saved, which adds one
+            to the <Strong>Requests served</Strong> count on the{" "}
+            <Link href="/usage" className={LINK_CLASS}>
+              Usage
+            </Link>{" "}
+            page. Nothing about you or the file comes with it. Your choice is
+            saved in your browser, and you can switch it back on whenever you
+            like.
           </p>
           <p>These statistics may include:</p>
           <ul className="list-disc space-y-1 pl-5">
@@ -76,6 +83,30 @@ export default function Page() {
             <li>Number of files saved</li>
             <li>Browser and OS</li>
           </ul>
+        </Section>
+
+        <Section title="Feedback and Reviews">
+          <p>
+            When you send feedback or leave a review on the{" "}
+            <Link href="/usage" className={LINK_CLASS}>
+              Usage
+            </Link>{" "}
+            page, it goes to a private Discord channel that only we can read.
+            Along with what you write, we receive:
+          </p>
+          <ul className="list-disc space-y-1 pl-5">
+            <li>
+              For feedback: the page you were on, and any contact details you
+              choose to add
+            </li>
+            <li>For a review: your name and email</li>
+            <li>For both: your browser and OS</li>
+          </ul>
+          <p>
+            Your email and contact details are only used to reply to you.
+            They are never shown on the site or shared with anyone. To have
+            something you sent deleted, email us at the address below.
+          </p>
         </Section>
 
         <Section title="Analytics and Cookies">
