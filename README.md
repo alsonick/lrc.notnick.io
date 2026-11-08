@@ -183,8 +183,9 @@ flowchart LR
 ```
 
 It is a Next.js 16 app (App Router) with React 19, TypeScript, Tailwind CSS 4
-and shadcn/ui on Base UI. There is no database. The only server code is two
-small routes that forward feedback and the usage record to Discord.
+and shadcn/ui on Base UI. The only server code is a few small routes that
+forward feedback, reviews and the usage record to Discord, plus a Postgres
+database (through Prisma) that counts the files saved.
 
 | Where | What |
 | --- | --- |
@@ -195,11 +196,13 @@ small routes that forward feedback and the usage record to Discord.
 | `src/lib/audio.ts` | Measuring an audio file's real length by decoding it |
 | `src/lib/lrc.ts` | Parsing lyrics, cleaning them up and writing the LRC |
 | `src/lib/srt.ts` | Turning LRC into SRT and reading hand-edited subtitles |
-| `src/app/api/` | The two routes that pass feedback and logs to Discord |
+| `src/app/api/` | The routes that pass feedback, reviews and logs to Discord, and count saves |
+| `prisma/` | The database schema and its migrations |
+| `src/lib/db.ts` | The Prisma client, null when there's no database |
 
 ## Run it locally
 
-You need [Node 20.9](https://nodejs.org) or newer and [pnpm](https://pnpm.io).
+You need [Node 20.19](https://nodejs.org) or newer and [pnpm](https://pnpm.io).
 
 ```bash
 git clone https://github.com/alsonick/lrc.notnick.io
@@ -211,17 +214,26 @@ pnpm dev
 Then open http://localhost:3000. `pnpm build` and `pnpm start` serve the
 production build, and `pnpm lint` runs ESLint.
 
-The app works without any configuration. Two optional Discord webhooks switch
-on the parts that talk to a server. Copy `.env.example` to `.env.local` and
-set whichever you want:
+The app works without any configuration. A Postgres database and a few
+optional Discord webhooks switch on the parts that talk to a server. Copy
+`.env.example` to `.env.local` and set whichever you want:
 
 | Variable | What it does | Without it |
 | --- | --- | --- |
+| `DATABASE_URL` | Counts the files saved for /usage, and stores each one when logging is on | Nothing is stored, and /usage shows a dash |
 | `DISCORD_WEBHOOK_URL` | Receives messages from the Feedback form | The form says feedback isn't set up |
-| `LOGGING` | Receives the usage record | Nothing is logged anywhere |
+| `LOGGING` | Receives the usage record | Nothing is logged to Discord |
+| `REVIEWS_WEBHOOK_URL` | Receives reviews from /usage | Reviews go to `DISCORD_WEBHOOK_URL` |
 
 Make a webhook in Discord under Server Settings > Integrations > Webhooks.
 Use a different channel for each.
+
+The database is set up with [Prisma](https://www.prisma.io). Once
+`DATABASE_URL` is set, create its tables with:
+
+```bash
+pnpm prisma migrate deploy
+```
 
 ## Feedback
 

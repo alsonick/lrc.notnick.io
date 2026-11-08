@@ -27,8 +27,9 @@ export type SavedFile = {
 };
 
 /**
- * Reports a file that was just saved. Nothing is sent for visitors who
- * switched logging off in the settings.
+ * Reports a file that was just saved. For visitors who switched logging off
+ * in the settings, the only thing sent is a bare request to add one to the
+ * count on /usage, with nothing about the file.
  */
 export function reportDownload({
   format,
@@ -39,7 +40,12 @@ export function reportDownload({
   audio,
 }: SavedFile) {
   saved[format] += 1;
-  if (!isLoggingEnabled()) return;
+  if (!isLoggingEnabled()) {
+    void fetch("/api/count", { method: "POST", keepalive: true }).catch(
+      () => {},
+    );
+    return;
+  }
 
   const log: SessionLog = {
     format,
