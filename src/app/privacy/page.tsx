@@ -5,7 +5,6 @@ import Link from "next/link";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 
 const title = "Privacy Policy";
-const description = `What ${SITE_NAME} keeps in your browser, what it logs, and how to switch that off.`;
 
 const EFFECTIVE_DATE = "8 Oct 2026";
 /** Change this whenever the policy's substance changes. */
@@ -14,19 +13,13 @@ const CONTACT_EMAIL = "hi@notnick.io";
 
 export const metadata: Metadata = {
   title,
-  description,
+  // Only the home page has a description; search engines write their own
+  // snippet for the rest. Null, as leaving it out would inherit the home page's.
+  description: null,
   alternates: { canonical: "/privacy" },
-  openGraph: {
-    title,
-    description,
-    url: "/privacy",
-    images: ["/og.png"],
-  },
-  twitter: {
-    title,
-    description,
-    images: ["/og.png"],
-  },
+  // No titles here: Next fills them in from `title`, the same as the tab.
+  openGraph: { url: "/privacy", images: ["/og.png"] },
+  twitter: { images: ["/og.png"] },
 };
 
 /**

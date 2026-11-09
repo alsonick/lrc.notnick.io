@@ -1,27 +1,18 @@
 import type { Metadata } from "next";
 
 import { SyncPage } from "@/components/sync/sync-page";
-import { SITE_DESCRIPTION } from "@/lib/constants";
 
 const title = "Synchronize";
-const description =
-  SITE_DESCRIPTION
 
 export const metadata: Metadata = {
   title,
-  description,
+  // Only the home page has a description; search engines write their own
+  // snippet for the rest. Null, as leaving it out would inherit the home page's.
+  description: null,
   alternates: { canonical: "/sync" },
-  openGraph: {
-    title,
-    description,
-    url: "/sync",
-    images: ["/og.png"],
-  },
-  twitter: {
-    title,
-    description,
-    images: ["/og.png"],
-  },
+  // No titles here: Next fills them in from `title`, the same as the tab.
+  openGraph: { url: "/sync", images: ["/og.png"] },
+  twitter: { images: ["/og.png"] },
 };
 
 export default function Page() {

@@ -6,27 +6,19 @@ import type { ReactNode } from "react";
 import { ArrowDown, ArrowUpRight } from "react-feather";
 
 import { ColorSwatch } from "@/components/assets/color-swatch";
-import { SITE_NAME } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 const title = "Assets";
-const description = `The ${SITE_NAME} logo as SVG and PNG, with its colours and type.`;
 
 export const metadata: Metadata = {
   title,
-  description,
+  // Only the home page has a description; search engines write their own
+  // snippet for the rest. Null, as leaving it out would inherit the home page's.
+  description: null,
   alternates: { canonical: "/assets" },
-  openGraph: {
-    title,
-    description,
-    url: "/assets",
-    images: ["/og.png"],
-  },
-  twitter: {
-    title,
-    description,
-    images: ["/og.png"],
-  },
+  // No titles here: Next fills them in from `title`, the same as the tab.
+  openGraph: { url: "/assets", images: ["/og.png"] },
+  twitter: { images: ["/og.png"] },
 };
 
 type Logo = {

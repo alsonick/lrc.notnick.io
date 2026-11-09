@@ -10,23 +10,16 @@ import { COUNT_ID, db } from "@/lib/db";
 import { social } from "@/lib/social-links";
 
 const title = "Usage";
-const description = `The channels that use ${SITE_NAME}, how much it gets used, and a place to leave a review.`;
 
 export const metadata: Metadata = {
   title,
-  description,
+  // Only the home page has a description; search engines write their own
+  // snippet for the rest. Null, as leaving it out would inherit the home page's.
+  description: null,
   alternates: { canonical: "/usage" },
-  openGraph: {
-    title,
-    description,
-    url: "/usage",
-    images: ["/og.png"],
-  },
-  twitter: {
-    title,
-    description,
-    images: ["/og.png"],
-  },
+  // No titles here: Next fills them in from `title`, the same as the tab.
+  openGraph: { url: "/usage", images: ["/og.png"] },
+  twitter: { images: ["/og.png"] },
 };
 
 // The count is read again at most once a minute, not on every visit.
