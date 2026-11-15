@@ -17,7 +17,7 @@ export function RequestsServed({
   return (
     <div
       className={cn(
-        "relative isolate flex flex-col overflow-hidden rounded-2xl bg-linear-to-br from-primary via-emerald-500 to-teal-600 p-8 text-neutral-950 shadow-lg ring-1 ring-black/10 sm:p-10",
+        "relative isolate flex flex-col overflow-hidden rounded-2xl bg-linear-to-br from-primary via-emerald-500 to-teal-600 p-6 text-neutral-950 shadow-lg ring-1 ring-black/10 sm:p-10",
         className,
       )}
     >

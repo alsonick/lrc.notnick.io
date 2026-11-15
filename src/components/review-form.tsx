@@ -72,7 +72,7 @@ export function ReviewForm({
     <form
       onSubmit={submit}
       aria-labelledby={labelledBy}
-      className={cn("rounded-2xl border bg-card p-8 shadow-xs", className)}
+      className={cn("rounded-2xl border bg-card p-5 shadow-xs sm:p-8", className)}
     >
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-2">
@@ -140,7 +140,12 @@ export function ReviewForm({
             Your email is only for getting back to you. It&apos;s never shown.
           </span>
         </p>
-        <Button type="submit" size="lg" disabled={sending}>
+        <Button
+          type="submit"
+          size="lg"
+          disabled={sending}
+          className="max-sm:w-full"
+        >
           <Send aria-hidden />
           {sending ? "Sending…" : "Send"}
         </Button>

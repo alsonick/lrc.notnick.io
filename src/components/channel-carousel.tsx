@@ -221,7 +221,8 @@ export function ChannelCarousel({
         // Clipped rather than hidden, so it can't be scrolled: focusing a
         // channel out of view would otherwise scroll it, out of step with the
         // track. The padding leaves room for a channel to grow.
-        "overflow-clip py-2 mask-[linear-gradient(to_right,transparent,black_6rem,black_calc(100%-6rem),transparent)] motion-reduce:mask-none",
+        // The fades are narrower on a phone, where they'd hide most of it.
+        "overflow-clip py-2 [--fade:2.5rem] mask-[linear-gradient(to_right,transparent,black_var(--fade),black_calc(100%-var(--fade)),transparent)] motion-reduce:mask-none sm:[--fade:6rem]",
         className,
       )}
     >
@@ -268,7 +269,7 @@ export function ChannelCarousel({
                       width={96}
                       height={96}
                       loading="eager"
-                      className="size-20 rounded-full object-cover ring-1 ring-foreground/10"
+                      className="size-16 rounded-full object-cover ring-1 ring-foreground/10 sm:size-20"
                     />
                     <span className="sr-only">
                       {" "}
