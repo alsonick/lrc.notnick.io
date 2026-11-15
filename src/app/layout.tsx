@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Inter } from "next/font/google";
 
 import { Footer } from "@/components/footer";
-import { MobileNotice } from "@/components/mobile-notice";
+import { DesktopOnly } from "@/components/mobile-notice";
 import { NavigationSound } from "@/components/navigation-sound";
 import { SeasonalDecoration } from "@/components/seasonal-decoration";
 import { SiteHeader } from "@/components/site-header";
@@ -159,9 +159,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
         <ThemeProvider>
           <TooltipProvider>
-            {/* The app is desktop-only: hidden below `sm`, where MobileNotice shows instead.
-                `app-shell` is how globals.css finds the page behind a dialog. */}
-            <div className="app-shell hidden flex-1 flex-col sm:flex">
+            {/* `app-shell` is how globals.css finds the page behind a dialog. */}
+            <div className="app-shell flex flex-1 flex-col">
               <SkipLink />
               <SiteHeader />
               <main
@@ -169,12 +168,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 tabIndex={-1}
                 className="flex flex-1 flex-col outline-none"
               >
-                {children}
+                <DesktopOnly>{children}</DesktopOnly>
               </main>
               <Footer />
             </div>
           </TooltipProvider>
-          <MobileNotice />
           <Toaster position="bottom-center" richColors />
           <UnsavedLyricsGuard />
           <SeasonalDecoration />

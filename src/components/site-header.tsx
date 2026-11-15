@@ -62,7 +62,8 @@ export function SiteHeader() {
           {NAV.map((item) => (
             <NavLink key={item.href} {...item} />
           ))}
-          <EditFileButton className={NAV_BUTTON_CLASS} />
+          {/* The file editor needs a desktop-sized screen, like the editor. */}
+          <EditFileButton className={cn(NAV_BUTTON_CLASS, "max-sm:hidden")} />
           <HelpDialog />
           <FeedbackDialog className={NAV_BUTTON_CLASS} />
           <SettingsDialog
@@ -94,12 +95,13 @@ function NavLink({
       href={href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-neutral-300 transition-colors hover:bg-white/10 hover:text-white sm:px-3 [&_svg]:size-4 [&_svg]:shrink-0",
+        "inline-flex min-h-9 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm text-neutral-300 transition-colors hover:bg-white/10 hover:text-white sm:px-3 [&_svg]:size-4 [&_svg]:shrink-0",
         active && "bg-primary/15 text-primary hover:text-primary",
       )}
     >
       <LinkIcon aria-hidden />
-      {label}
+      {/* Icons only on a phone, so the whole bar fits. */}
+      <span className="sr-only sm:not-sr-only">{label}</span>
     </Link>
   );
 }

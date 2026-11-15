@@ -30,9 +30,9 @@ export const metadata: Metadata = {
  */
 export default function Page() {
   return (
-    <div className="mx-auto w-full max-w-5xl mt-8 px-4 py-6 sm:py-10">
+    <div className="mx-auto mt-4 w-full max-w-5xl px-4 py-6 sm:mt-8 sm:py-10">
       <article className="max-w-208">
-        <h1 className="text-4xl font-black tracking-tight">
+        <h1 className="text-3xl font-black tracking-tight sm:text-4xl">
           Privacy Policy
         </h1>
         <p className="mt-2 text-base text-muted-foreground">

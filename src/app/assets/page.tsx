@@ -89,8 +89,8 @@ const RING_CLASS =
 
 export default function Page() {
   return (
-    <div className="mx-auto w-full max-w-5xl mt-8 px-4 py-6 sm:py-10">
-      <h1 className="text-4xl font-black tracking-tight">Assets</h1>
+    <div className="mx-auto mt-4 w-full max-w-5xl px-4 py-6 sm:mt-8 sm:py-10">
+      <h1 className="text-3xl font-black tracking-tight sm:text-4xl">Assets</h1>
 
       <Section
         title="Logo"
@@ -105,7 +105,7 @@ export default function Page() {
                 download
                 aria-label={`Download the ${logo.name.toLowerCase()} logo as SVG`}
                 className={cn(
-                  "group relative flex items-center justify-center bg-muted/40 p-12 ring-inset",
+                  "group relative flex items-center justify-center bg-muted/40 p-8 ring-inset sm:p-12",
                   RING_CLASS,
                 )}
               >
@@ -115,11 +115,11 @@ export default function Page() {
                   width={144}
                   height={144}
                   unoptimized
-                  className="size-36"
+                  className="size-28 sm:size-36"
                 />
                 <span
                   aria-hidden
-                  className="absolute right-3 bottom-3 flex items-center gap-1 rounded-full bg-foreground px-2.5 py-1 text-xs font-medium text-background opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+                  className="absolute right-3 bottom-3 flex items-center gap-1 rounded-full bg-foreground px-2.5 py-1 text-xs font-medium text-background opacity-0 transition-opacity pointer-coarse:opacity-100 group-hover:opacity-100 group-focus-visible:opacity-100"
                 >
                   <ArrowDown className="size-3 transform-none" />
                   Download
@@ -156,7 +156,7 @@ export default function Page() {
         title="Colour"
         intro="Green does the talking and the neutrals stay out of its way. Click a swatch to copy its hex code."
       >
-        <ul className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
+        <ul className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-5">
           {COLOURS.map((colour) => (
             <ColorSwatch key={colour.hex} {...colour} />
           ))}
@@ -169,7 +169,7 @@ export default function Page() {
       >
         <ul className="grid gap-4 md:grid-cols-2">
           {FONTS.map((font) => (
-            <li key={font.name} className={cn(CARD_CLASS, "p-6")}>
+            <li key={font.name} className={cn(CARD_CLASS, "p-5 sm:p-6")}>
               <p
                 aria-hidden
                 className={cn("text-6xl font-semibold", font.className)}
@@ -210,10 +210,10 @@ function Section({
   children: ReactNode;
 }) {
   return (
-    <section className="mt-14 border-t pt-12">
-      <h2 className="text-3xl font-black tracking-tight">{title}</h2>
+    <section className="mt-10 border-t pt-8 sm:mt-14 sm:pt-12">
+      <h2 className="text-2xl font-black tracking-tight sm:text-3xl">{title}</h2>
       <p className="mt-2 max-w-208 text-base text-muted-foreground">{intro}</p>
-      <div className="mt-8">{children}</div>
+      <div className="mt-6 sm:mt-8">{children}</div>
     </section>
   );
 }

@@ -45,9 +45,9 @@ export default async function Page() {
   const requestsServed = await getRequestsServed();
 
   return (
-    <div className="mx-auto w-full max-w-5xl mt-8 px-4 py-6 sm:py-10">
+    <div className="mx-auto mt-4 w-full max-w-5xl px-4 py-6 sm:mt-8 sm:py-10">
       <header className="max-w-208">
-        <h1 className="text-4xl font-black tracking-tight">Usage</h1>
+        <h1 className="text-3xl font-black tracking-tight sm:text-4xl">Usage</h1>
         <p className="mt-3 text-base leading-relaxed text-muted-foreground">
           {SITE_NAME} is free and runs right in your browser, with nothing to
           install or sign up for. Here are some of the channels that use it to
@@ -75,7 +75,7 @@ export default async function Page() {
 
         <section
           aria-labelledby="featured-heading"
-          className="flex flex-col rounded-2xl border bg-card p-8 shadow-xs"
+          className="flex flex-col rounded-2xl border bg-card p-6 shadow-xs sm:p-8"
         >
           <h2 id="featured-heading" className="text-lg font-bold tracking-tight">
             Use it on your channel?
@@ -96,11 +96,11 @@ export default async function Page() {
         </section>
       </div>
 
-      <section className="mt-16">
+      <section className="mt-12 sm:mt-16">
         {/* Styled like the page's heading, one size down. */}
         <h2
           id="review-heading"
-          className="text-3xl font-black tracking-tight"
+          className="text-2xl font-black tracking-tight sm:text-3xl"
         >
           Leave a review
         </h2>

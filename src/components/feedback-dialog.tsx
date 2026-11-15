@@ -86,7 +86,7 @@ export function FeedbackDialog({
           render={<Button variant="ghost" className={className} />}
         >
           <MessageSquare aria-hidden />
-          Feedback
+          <span className="sr-only sm:not-sr-only">Feedback</span>
         </DialogTrigger>
       )}
       <DialogContent className="sm:max-w-md">
