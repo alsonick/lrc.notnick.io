@@ -56,7 +56,7 @@ export function ToolbarSwitch({
             control it names, and the switch brings a hidden checkbox along. */}
         <label
           htmlFor={id}
-          className="flex h-full cursor-pointer items-center pr-3 pl-2.5 select-none"
+          className="flex h-full cursor-pointer items-center pr-3 pl-2.5 whitespace-nowrap select-none"
         >
           {children}
         </label>

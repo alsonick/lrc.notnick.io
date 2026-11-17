@@ -543,16 +543,21 @@ export function SyncSession({
     upNext = "Every line is stamped. Press Done to finish.";
   }
 
-  const status = [
-    `${cursor} / ${syncable.length} lines`,
-    audio
-      ? clock.duration
-        ? formatClock(clock.duration)
-        : null
-      : "stopwatch",
-  ]
-    .filter(Boolean)
-    .join(" · ");
+  const statusFor = (count: number) =>
+    [
+      `${count} / ${syncable.length} lines`,
+      audio
+        ? clock.duration
+          ? formatClock(clock.duration)
+          : null
+        : "stopwatch",
+    ]
+      .filter(Boolean)
+      .join(" · ");
+  const status = statusFor(cursor);
+  // As wide as it gets, with every line stamped. Room is kept for it, so the
+  // toolbar doesn't rearrange itself as the count goes up mid-song.
+  const widestStatus = statusFor(syncable.length);
 
   // The End on Done switch's tooltip: how long the last line lasts without
   // it, which is as long as the audio, when there's audio to measure.
@@ -616,7 +621,10 @@ export function SyncSession({
         <div
           role="group"
           aria-label="Playback controls"
-          className="flex flex-wrap items-center gap-2 rounded-b-xl border-t border-white/10 bg-neutral-950/85 px-3 py-3"
+          // To the top: the Next Line column can be two rows tall, and the
+          // rest belongs level with its first. Every control is 40px tall,
+          // so it's the same as centring otherwise.
+          className="flex flex-wrap items-start gap-2 rounded-b-xl border-t border-white/10 bg-neutral-950/85 px-3 py-3"
         >
           <ToolbarButton
             onClick={() => {
@@ -688,84 +696,99 @@ export function SyncSession({
             </ToolbarButton>
           </div>
 
-          <div className="flex flex-1 items-stretch">
-            <Select
-              value={String(anticipation)}
-              onValueChange={(value) => {
-                if (value !== null) setAnticipation(Number(value));
-              }}
-              items={ANTICIPATION_OPTIONS}
-            >
-              <SelectTrigger
-                aria-label="Anticipation subtracted from each timestamp"
-                title="Anticipation: each stamp is moved this much earlier"
-                className={SELECT_TRIGGER_CLASS}
+          {/* Next Line, and the switch for how Done ends the last line. When
+              there's room they sit side by side, and Next Line takes the
+              spare space. When there isn't, the switch drops beneath it and
+              stretches to its width, lined up with both its edges. */}
+          <div className="flex flex-1 flex-wrap items-center gap-2">
+            <div className="flex grow-999 items-stretch">
+              <Select
+                value={String(anticipation)}
+                onValueChange={(value) => {
+                  if (value !== null) setAnticipation(Number(value));
+                }}
+                items={ANTICIPATION_OPTIONS}
               >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {ANTICIPATION_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <ToolbarButton
-              ref={nextButtonRef}
-              onClick={nextLine}
-              disabled={!done && !isPlaying}
-              // Done stamps too while the song plays with End on Done, so it
-              // also stamps on the way down. Paused, it keeps its own keys.
-              data-stamps={!done || (endOnDone && isPlaying) ? "" : undefined}
-              title={
-                !done
-                  ? undefined
-                  : endOnDone
-                    ? "End the last line here, then download the .lrc or edit it and convert it to .srt"
-                    : "Download the .lrc, or edit it and convert it to .srt"
-              }
-              className={cn(
-                "min-w-28 flex-1 rounded-l-none border-l-0",
-                done && READY_CLASS,
-              )}
-            >
-              {done ? (
-                <>
-                  <Check aria-hidden />
-                  Done
-                </>
-              ) : (
-                <>
-                  <ChevronRight aria-hidden />
-                  Next Line
-                </>
-              )}
-            </ToolbarButton>
-          </div>
+                <SelectTrigger
+                  aria-label="Anticipation subtracted from each timestamp"
+                  title="Anticipation: each stamp is moved this much earlier"
+                  className={SELECT_TRIGGER_CLASS}
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ANTICIPATION_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <ToolbarButton
+                ref={nextButtonRef}
+                onClick={nextLine}
+                disabled={!done && !isPlaying}
+                // Done stamps too while the song plays with End on Done, so it
+                // also stamps on the way down. Paused, it keeps its own keys.
+                data-stamps={!done || (endOnDone && isPlaying) ? "" : undefined}
+                title={
+                  !done
+                    ? undefined
+                    : endOnDone
+                      ? "End the last line here, then download the .lrc or edit it and convert it to .srt"
+                      : "Download the .lrc, or edit it and convert it to .srt"
+                }
+                className={cn(
+                  "min-w-28 flex-1 rounded-l-none border-l-0",
+                  done && READY_CLASS,
+                )}
+              >
+                {done ? (
+                  <>
+                    <Check aria-hidden />
+                    Done
+                  </>
+                ) : (
+                  <>
+                    <ChevronRight aria-hidden />
+                    Next Line
+                  </>
+                )}
+              </ToolbarButton>
+            </div>
 
-          {/* Under Done once the toolbar wraps, which is what it changes. */}
-          <div className="ml-auto flex items-center gap-3">
-            <ToolbarSwitch
-              checked={endOnDone}
-              onCheckedChange={setEndOnDone}
-              description={endOnDoneHint}
-            >
-              End last line on &quot;Done&quot;
-            </ToolbarSwitch>
-            <span className="hidden text-xs text-neutral-400 tabular-nums lg:inline">
-              {status}
-            </span>
-            <ToolbarButton
-              onClick={save}
-              disabled={!hasProgress}
-              aria-label="Save .lrc"
-              title="Save .lrc"
-              className={cn(done && READY_CLASS)}
-            >
-              <Download aria-hidden />
-              <span className="hidden lg:inline">Save .lrc</span>
-            </ToolbarButton>
+            {/* Grows too, but only by a sliver of the spare space beside
+                Next Line's 999 parts; on a row of its own, by all of it. */}
+            <div className="flex grow items-center gap-3">
+              <ToolbarSwitch
+                checked={endOnDone}
+                onCheckedChange={setEndOnDone}
+                description={endOnDoneHint}
+              >
+                End last line on &quot;Done&quot;
+              </ToolbarSwitch>
+              <div className="ml-auto flex items-center gap-3">
+                {/* The widest the status gets, hidden, holds its place. */}
+                <span className="hidden text-xs text-neutral-400 tabular-nums lg:inline-grid">
+                  <span aria-hidden className="invisible col-start-1 row-start-1">
+                    {widestStatus}
+                  </span>
+                  <span className="col-start-1 row-start-1 text-right">
+                    {status}
+                  </span>
+                </span>
+                <ToolbarButton
+                  onClick={save}
+                  disabled={!hasProgress}
+                  aria-label="Save .lrc"
+                  title="Save .lrc"
+                  className={cn(done && READY_CLASS)}
+                >
+                  <Download aria-hidden />
+                  <span className="hidden lg:inline">Save .lrc</span>
+                </ToolbarButton>
+              </div>
+            </div>
           </div>
         </div>
       </section>
