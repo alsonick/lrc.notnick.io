@@ -76,7 +76,7 @@ export function ReviewForm({
     >
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-2">
-          <Label htmlFor="review-name">Name</Label>
+          <Label htmlFor="review-name" required>Name</Label>
           <Input
             id="review-name"
             value={name}
@@ -88,7 +88,7 @@ export function ReviewForm({
           />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="review-email">Email</Label>
+          <Label htmlFor="review-email" required>Email</Label>
           <Input
             id="review-email"
             type="email"
@@ -102,7 +102,7 @@ export function ReviewForm({
           />
         </div>
         <div className="grid gap-2 sm:col-span-2">
-          <Label htmlFor="review-text">Review</Label>
+          <Label htmlFor="review-text" required>Review</Label>
           <Textarea
             id="review-text"
             value={review}
@@ -137,7 +137,7 @@ export function ReviewForm({
         >
           <Info aria-hidden className="mt-px size-3.5 shrink-0" />
           <span>
-            Your email is only for getting back to you. It&apos;s never shown.
+            Your email is only for getting back to you.
           </span>
         </p>
         <Button

@@ -3,7 +3,12 @@
 import * as React from "react"
 import { cn } from "cn"
 
-function Label({ className, ...props }: React.ComponentProps<"label">) {
+function Label({
+  className,
+  required,
+  children,
+  ...props
+}: React.ComponentProps<"label"> & { required?: boolean }) {
   return (
     <label
       data-slot="label"
@@ -12,7 +17,17 @@ function Label({ className, ...props }: React.ComponentProps<"label">) {
         className
       )}
       {...props}
-    />
+    >
+      {children}
+      {/* Screen readers already hear "required" from the field itself, so the
+          asterisk is only for sighted visitors. The negative margin pulls it
+          up against the label text instead of the usual gap. */}
+      {required && (
+        <span aria-hidden className="-ml-1.5 text-destructive">
+          *
+        </span>
+      )}
+    </label>
   )
 }
 
