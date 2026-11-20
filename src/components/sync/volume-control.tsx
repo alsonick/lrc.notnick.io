@@ -62,7 +62,7 @@ export function VolumeControl({ volume, onVolumeChange }: Props) {
           largeStep={0.1}
           format={{ style: "percent" }}
           aria-label="Volume"
-          className="w-20 [&_[data-slot=slider-track]]:bg-white/15"
+          className="w-20 **:data-[slot=slider-track]:bg-white/15"
         />
       </div>
     </div>
