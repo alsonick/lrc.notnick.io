@@ -692,98 +692,98 @@ export function SyncSession({
             </ToolbarButton>
           </div>
 
-          {/* Next Line, and the switch for how Done ends the last line. When
-              there's room they sit side by side, and Next Line takes the
-              spare space. When there isn't, the switch drops beneath it and
-              stretches to its width, lined up with both its edges. */}
-          <div className="flex flex-1 flex-wrap items-center gap-2">
-            <div className="flex grow-999 items-stretch">
-              <Select
-                value={String(anticipation)}
-                onValueChange={(value) => {
-                  if (value !== null) setAnticipation(Number(value));
-                }}
-                items={ANTICIPATION_OPTIONS}
+          {/* Next Line and the switch for how Done ends the last line sit
+              straight in the toolbar, not in a wrapper of their own. Next
+              Line fills the space beside START, and the switch, too wide to
+              fit there too, drops to its own row. A shared wrapper is at
+              least as wide as the switch, so it took Next Line down with it
+              and left that space empty. */}
+          <div className="flex grow-999 items-stretch">
+            <Select
+              value={String(anticipation)}
+              onValueChange={(value) => {
+                if (value !== null) setAnticipation(Number(value));
+              }}
+              items={ANTICIPATION_OPTIONS}
+            >
+              <SelectTrigger
+                aria-label="Anticipation subtracted from each timestamp"
+                title="Anticipation: each stamp is moved this much earlier"
+                className={SELECT_TRIGGER_CLASS}
               >
-                <SelectTrigger
-                  aria-label="Anticipation subtracted from each timestamp"
-                  title="Anticipation: each stamp is moved this much earlier"
-                  className={SELECT_TRIGGER_CLASS}
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {ANTICIPATION_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <ToolbarButton
-                ref={nextButtonRef}
-                onClick={nextLine}
-                disabled={!done && !isPlaying}
-                // Done stamps too while the song plays with End on Done, so it
-                // also stamps on the way down. Paused, it keeps its own keys.
-                data-stamps={!done || (endOnDone && isPlaying) ? "" : undefined}
-                title={
-                  !done
-                    ? undefined
-                    : endOnDone
-                      ? "End the last line here, then download the .lrc or edit it and convert it to .srt"
-                      : "Download the .lrc, or edit it and convert it to .srt"
-                }
-                className={cn(
-                  "min-w-28 flex-1 rounded-l-none border-l-0",
-                  done && READY_CLASS,
-                )}
-              >
-                {done ? (
-                  <>
-                    <Check aria-hidden />
-                    Done
-                  </>
-                ) : (
-                  <>
-                    <ChevronRight aria-hidden />
-                    Next Line
-                  </>
-                )}
-              </ToolbarButton>
-            </div>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {ANTICIPATION_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <ToolbarButton
+              ref={nextButtonRef}
+              onClick={nextLine}
+              disabled={!done && !isPlaying}
+              // Done stamps too while the song plays with End on Done, so it
+              // also stamps on the way down. Paused, it keeps its own keys.
+              data-stamps={!done || (endOnDone && isPlaying) ? "" : undefined}
+              title={
+                !done
+                  ? undefined
+                  : endOnDone
+                    ? "End the last line here, then download the .lrc or edit it and convert it to .srt"
+                    : "Download the .lrc, or edit it and convert it to .srt"
+              }
+              className={cn(
+                "min-w-28 flex-1 rounded-l-none border-l-0",
+                done && READY_CLASS,
+              )}
+            >
+              {done ? (
+                <>
+                  <Check aria-hidden />
+                  Done
+                </>
+              ) : (
+                <>
+                  <ChevronRight aria-hidden />
+                  Next Line
+                </>
+              )}
+            </ToolbarButton>
+          </div>
 
-            {/* Grows too, but only by a sliver of the spare space beside
-                Next Line's 999 parts; on a row of its own, by all of it. */}
-            <div className="flex grow items-center gap-3">
-              <ToolbarSwitch
-                checked={endOnDone}
-                onCheckedChange={setEndOnDone}
-                description={endOnDoneHint}
-              >
-                End last line on &quot;Done&quot;
-              </ToolbarSwitch>
-              <div className="ml-auto flex items-center gap-3">
-                {/* The widest the status gets, hidden, holds its place. */}
-                <span className="hidden text-xs text-neutral-400 tabular-nums lg:inline-grid">
-                  <span aria-hidden className="invisible col-start-1 row-start-1">
-                    {widestStatus}
-                  </span>
-                  <span className="col-start-1 row-start-1 text-right">
-                    {status}
-                  </span>
+          {/* Grows too, but only by a sliver of the spare space beside
+              Next Line's 999 parts; on a row of its own, by all of it. */}
+          <div className="flex grow items-center gap-3">
+            <ToolbarSwitch
+              checked={endOnDone}
+              onCheckedChange={setEndOnDone}
+              description={endOnDoneHint}
+            >
+              End last line on &quot;Done&quot;
+            </ToolbarSwitch>
+            <div className="ml-auto flex items-center gap-3">
+              {/* The widest the status gets, hidden, holds its place. */}
+              <span className="hidden text-xs text-neutral-400 tabular-nums lg:inline-grid">
+                <span aria-hidden className="invisible col-start-1 row-start-1">
+                  {widestStatus}
                 </span>
-                <ToolbarButton
-                  onClick={save}
-                  disabled={!hasProgress}
-                  aria-label="Save .lrc"
-                  title="Save .lrc"
-                  className={cn(done && READY_CLASS)}
-                >
-                  <Download aria-hidden />
-                  <span className="hidden lg:inline">Save .lrc</span>
-                </ToolbarButton>
-              </div>
+                <span className="col-start-1 row-start-1 text-right">
+                  {status}
+                </span>
+              </span>
+              <ToolbarButton
+                onClick={save}
+                disabled={!hasProgress}
+                aria-label="Save .lrc"
+                title="Save .lrc"
+                className={cn(done && READY_CLASS)}
+              >
+                <Download aria-hidden />
+                <span className="hidden lg:inline">Save .lrc</span>
+              </ToolbarButton>
             </div>
           </div>
         </div>
