@@ -155,8 +155,6 @@ Two things are sent, both to a private Discord text channel:
 - **Feedback**
 - **Usage**
 
-There are no cookies, no account and no third-party analytics. Read more here > [lrc.notnick.io/privacy](https://lrc.notnick.io/privacy).
-
 ## How it fits together
 
 ```mermaid
