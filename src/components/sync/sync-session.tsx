@@ -25,11 +25,11 @@ import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { ExportPanel } from "@/components/export/export-panel";
 import { FinishDialog } from "@/components/export/finish-dialog";
+import { Keycap } from "@/components/keycap";
 import { LyricRow, type LineState } from "@/components/sync/lyric-row";
 import { ToolbarButton } from "@/components/sync/toolbar-button";
 import { ToolbarSwitch } from "@/components/sync/toolbar-switch";
 import { VolumeControl } from "@/components/sync/volume-control";
-import { Kbd } from "@/components/ui/kbd";
 import {
   Select,
   SelectContent,
@@ -90,10 +90,6 @@ const SHORTCUT_KEYCAPS: Partial<Record<string, string>> = {
   p: "P",
   P: "P",
 };
-
-/** Keycaps sink quickly while held and spring back on release. */
-const KEYCAP_CLASS =
-  "[transition:translate_500ms_var(--ease-spring),scale_500ms_var(--ease-spring),color_200ms,background-color_200ms,border-color_200ms] data-pressed:translate-y-px data-pressed:scale-90 data-pressed:border-primary/50 data-pressed:bg-primary/20 data-pressed:text-green-800 data-pressed:duration-75 data-pressed:ease-out motion-reduce:transition-none dark:data-pressed:border-primary/50 dark:data-pressed:bg-primary/20 dark:data-pressed:text-primary";
 
 type Props = {
   lines: LyricLine[];
@@ -851,21 +847,6 @@ export function SyncSession({
         finalFocus={nextButtonRef}
       />
     </div>
-  );
-}
-
-/** Shortcut hint that sinks while its key is held down. */
-function Keycap({
-  pressed,
-  children,
-}: {
-  pressed: boolean;
-  children: ReactNode;
-}) {
-  return (
-    <Kbd data-pressed={pressed || undefined} className={KEYCAP_CLASS}>
-      {children}
-    </Kbd>
   );
 }
 
