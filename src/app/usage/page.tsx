@@ -5,9 +5,11 @@ import { ChannelCarousel } from "@/components/channel-carousel";
 import { RequestsServed } from "@/components/requests-served";
 import { ReviewForm } from "@/components/review-form";
 import { buttonVariants } from "@/components/ui/button";
+import { UsageOverview } from "@/components/usage/usage-overview";
 import { SITE_NAME } from "@/lib/constants";
 import { COUNT_ID, db } from "@/lib/db";
 import { social } from "@/lib/social-links";
+import { getUsageStats } from "@/lib/usage-stats";
 
 const title = "Usage";
 
@@ -22,7 +24,7 @@ export const metadata: Metadata = {
   twitter: { images: ["/og.png"] },
 };
 
-// The count is read again at most once a minute, not on every visit.
+// The count and charts are read again at most once a minute, not on every visit.
 export const revalidate = 60;
 
 /**
@@ -42,7 +44,10 @@ async function getRequestsServed(): Promise<number | null> {
 }
 
 export default async function Page() {
-  const requestsServed = await getRequestsServed();
+  const [requestsServed, stats] = await Promise.all([
+    getRequestsServed(),
+    getUsageStats(),
+  ]);
 
   return (
     <div className="mx-auto mt-4 w-full max-w-5xl px-4 py-6 sm:mt-8 sm:py-10">
@@ -51,23 +56,13 @@ export default async function Page() {
         <p className="mt-3 text-base leading-relaxed text-muted-foreground">
           {SITE_NAME} is free and runs right in your browser, with nothing to
           install or sign up for. Here are some of the channels that use it to
-          time their lyrics, and how much it gets used.
+          synchronize their lyrics, and how much it gets used.
         </p>
       </header>
 
       {/* The full width of the page, wider than the text above. */}
-      <section aria-labelledby="channels-heading" className="mt-10">
-        <h2
-          id="channels-heading"
-          className="text-base font-medium text-muted-foreground"
-        >
-          YouTube channels that use this service:
-        </h2>
-        <ChannelCarousel
-          label={`Channels that use ${SITE_NAME}`}
-          // With the carousel's own padding, the same gap as before.
-          className="mt-3"
-        />
+      <section className="mt-10">
+        <ChannelCarousel label={`Channels that use ${SITE_NAME}`} />
       </section>
 
       <div className="mt-10 grid gap-4 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
@@ -95,6 +90,22 @@ export default async function Page() {
           </div>
         </section>
       </div>
+
+      {/* Left out without a database, as there's nothing to chart. */}
+      {stats && (
+        <section aria-labelledby="numbers-heading" className="mt-12 sm:mt-16">
+          <h2
+            id="numbers-heading"
+            className="text-2xl font-black tracking-tight sm:text-3xl"
+          >
+            Statistics
+          </h2>
+          <p className="mt-3 max-w-208 text-base leading-relaxed text-muted-foreground">
+            A look at how the site gets used, from the files people save.
+          </p>
+          <UsageOverview stats={stats} className="mt-6" />
+        </section>
+      )}
 
       <section className="mt-12 sm:mt-16">
         {/* Styled like the page's heading, one size down. */}

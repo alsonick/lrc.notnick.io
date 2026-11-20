@@ -76,6 +76,15 @@ export default function Page() {
             <li>Number of files saved</li>
             <li>Browser and OS</li>
           </ul>
+          <p>
+            The charts on the{" "}
+            <Link href="/usage" className={LINK_CLASS}>
+              Usage
+            </Link>{" "}
+            page are made from these statistics. They only show totals: how
+            many files were saved each day and hour, of which type, and how the
+            lyrics got there. No file name, or anything about you, is shown.
+          </p>
         </Section>
 
         <Section title="Feedback and Reviews">
