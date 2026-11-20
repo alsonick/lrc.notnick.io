@@ -205,7 +205,7 @@ function SettingsList({ onNavigate }: { onNavigate: () => void }) {
             format={{ style: "percent" }}
             disabled={!decorations}
             aria-label="Decorations opacity"
-            className="flex-1 [&_[data-slot=slider-indicator]]:bg-green-600 [&_[data-slot=slider-thumb]]:ring-foreground/60 [&_[data-slot=slider-track]]:bg-foreground/45"
+            className="flex-1 **:data-[slot=slider-indicator]:bg-green-600 **:data-[slot=slider-thumb]:ring-foreground/60 **:data-[slot=slider-track]:bg-foreground/45"
           />
           <span className="w-9 text-right tabular-nums">
             {Math.round(opacity * 100)}%
@@ -252,7 +252,7 @@ function SettingsList({ onNavigate }: { onNavigate: () => void }) {
             format={{ style: "percent" }}
             disabled={!sound}
             aria-label="Click volume"
-            className="flex-1 [&_[data-slot=slider-indicator]]:bg-green-600 [&_[data-slot=slider-thumb]]:ring-foreground/60 [&_[data-slot=slider-track]]:bg-foreground/45"
+            className="flex-1 **:data-[slot=slider-indicator]:bg-green-600 **:data-[slot=slider-thumb]:ring-foreground/60 **:data-[slot=slider-track]:bg-foreground/45"
           />
           <span className="w-9 text-right tabular-nums">
             {Math.round(volume * 100)}%
