@@ -13,11 +13,14 @@ enum DownloadFormat {
   srt
 }
 
-/// Where the lyrics came from: synced here, the editor as it is, or an uploaded .lrc.
+/// Where the lyrics came from: synced here, the editor as it is, an uploaded
+/// .lrc, or an .lrc converted by the Discord bot (LRC-Generator-Bot), which
+/// writes to this database too and keeps a copy of this schema.
 enum DownloadSource {
   sync
   editor
   upload
+  discord
 }
 
 /// One file saved from the site. Only what the download log already reports
@@ -31,7 +34,8 @@ model Download {
 }
 
 /// How many requests the site has served, shown as "Requests served" on
-/// /usage: one for each .lrc or .srt saved. A single row (`COUNT_ID` in
+/// /usage: one for each .lrc or .srt saved, and one for each file the Discord
+/// bot converts. A single row (`COUNT_ID` in
 /// src/lib/db.ts), made by the first migration.
 model Count {
   id        Int      @id @default(1)
