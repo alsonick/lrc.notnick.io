@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentType, ReactNode } from "react";
+import { useEffect, useState, type ComponentType, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -9,6 +9,7 @@ import {
   CornerUpLeft,
   Download,
   Edit3,
+  Heart,
   HelpCircle,
   Music,
   Play,
@@ -18,9 +19,10 @@ import {
 
 import { EditFileButton } from "@/components/export/edit-file-button";
 import { FeedbackDialog } from "@/components/feedback-dialog";
+import { Keycap } from "@/components/keycap";
 import { Logo } from "@/components/logo";
 import { SettingsDialog } from "@/components/settings-dialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -29,8 +31,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Kbd } from "@/components/ui/kbd";
 import { SITE_NAME } from "@/lib/constants";
+import { social } from "@/lib/social-links";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -38,7 +40,7 @@ const NAV = [
   { href: "/sync", label: "Synchronize", icon: Activity },
 ] as const;
 
-/** Keeps the Upload, Help, Feedback and settings buttons on the same shape as the links. */
+/** Keeps the Upload, Help, Feedback, Support and settings buttons on the same shape as the links. */
 const NAV_BUTTON_CLASS =
   "rounded-md text-neutral-300 hover:bg-white/10 hover:text-white dark:hover:bg-white/10";
 
@@ -66,6 +68,16 @@ export function SiteHeader() {
           <EditFileButton className={cn(NAV_BUTTON_CLASS, "max-sm:hidden")} />
           <HelpDialog />
           <FeedbackDialog className={NAV_BUTTON_CLASS} />
+          <a
+            href={social.paypal.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={social.paypal.title}
+            className={cn(buttonVariants({ variant: "ghost" }), NAV_BUTTON_CLASS)}
+          >
+            <Heart aria-hidden />
+            <span className="sr-only sm:not-sr-only">Support</span>
+          </a>
           <SettingsDialog
             className={cn(
               NAV_BUTTON_CLASS,
@@ -116,16 +128,22 @@ const STEPS: Step[] = [
   {
     icon: Clipboard,
     title: "Paste your lyrics",
-    body: "Copy them from Genius or anywhere else.",
+    body: (
+      <>
+        Copy them from anywhere and paste them in.{" "}
+        <strong>Strip sections</strong> and <strong>Strip tags</strong> clear
+        out headers like [Chorus] and any old time stamps.
+      </>
+    ),
   },
   {
     icon: Music,
     title: "Load your song",
     body: (
       <>
-        Click <strong>Synchronize</strong>, then <strong>Audio</strong>. No
-        file? START runs a stopwatch so you can sync to music playing
-        elsewhere.
+        Click <strong>Synchronize</strong>, then <strong>Audio</strong> to pick
+        a file. No file? START runs a stopwatch so you can sync to music
+        playing in another app.
       </>
     ),
   },
@@ -134,9 +152,9 @@ const STEPS: Step[] = [
     title: "Stamp each line",
     body: (
       <>
-        Press <strong>START</strong>, then hit <strong>Next Line</strong> as
-        each line is sung. The dropdowns add a countdown or shift stamps
-        earlier.
+        Press <strong>START</strong>, then hit <strong>Next Line</strong> (or
+        Space) as each line is sung. The dropdowns add a countdown or shift
+        stamps a little earlier.
       </>
     ),
   },
@@ -145,9 +163,8 @@ const STEPS: Step[] = [
     title: "Fix a mistake",
     body: (
       <>
-        Pause and click the dot in front of a line to clear it and everything
-        after it. Playback goes back up to two seconds, never past the line
-        before, so you can try again.
+        Pause and click the dot in front of a line to clear it and the ones
+        after it. Playback rewinds up to two seconds so you can try it again.
       </>
     ),
   },
@@ -156,12 +173,9 @@ const STEPS: Step[] = [
     title: "Save the file",
     body: (
       <>
-        Stamp the last line and hit <strong>Done</strong>. The last line lasts
-        until the song ends, or switch on <strong>End last line on Done</strong>{" "}
-        to end it right as you press Done.{" "}
-        <strong>Edit</strong> lets you polish the file and save it as .lrc or
-        as .srt subtitles; <strong>Cancel</strong> downloads the .lrc as it is.
-        Keep it next to your audio with the same name so players pick it up.
+        Hit <strong>Done</strong>, then <strong>Edit</strong> to polish and
+        save as .lrc or .srt, or <strong>Cancel</strong> to download the .lrc.
+        Give it your audio&apos;s name so players find it.
       </>
     ),
   },
@@ -173,6 +187,101 @@ const SHORTCUTS: { keys: string[]; action: string }[] = [
   { keys: ["P"], action: "Play or pause" },
   { keys: ["↑", "↓"], action: "Undo / next line" },
 ];
+
+/** The keycap in the list below that each key lights up. */
+const SHORTCUT_KEYCAPS: Partial<Record<string, string>> = {
+  Enter: "Enter",
+  " ": "Space",
+  Backspace: "Backspace",
+  p: "P",
+  P: "P",
+  ArrowUp: "↑",
+  ArrowDown: "↓",
+};
+
+/**
+ * The shortcut list, whose keycaps sink while their key is held, as they do
+ * on the sync page. The keys do nothing else here; it is only so people can
+ * try them out.
+ */
+function ShortcutList() {
+  const [pressed, setPressed] = useState<ReadonlySet<string>>(() => new Set());
+
+  useEffect(() => {
+    const setKeycapPressed = (key: string, down: boolean) => {
+      const keycap = SHORTCUT_KEYCAPS[key];
+      if (!keycap) return;
+      setPressed((current) => {
+        if (current.has(keycap) === down) return current;
+        const next = new Set(current);
+        if (down) next.add(keycap);
+        else next.delete(keycap);
+        return next;
+      });
+    };
+    // The dialog opens with focus on its close button, so trying Enter or
+    // Space would close it. Someone who opened the dialog from the keyboard,
+    // or has moved around it with Tab, keeps those keys, so it can still be
+    // worked without a mouse. (Checking each button for keyboard focus would
+    // not do: any key press gives it keyboard focus.)
+    let keyboardUser =
+      document.activeElement?.matches(":focus-visible") ?? false;
+    const swallow = (event: KeyboardEvent) => {
+      const target = event.target instanceof Element ? event.target : null;
+      return (
+        !keyboardUser &&
+        (event.key === "Enter" || event.key === " ") &&
+        !!target?.closest("button")
+      );
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Tab") keyboardUser = true;
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      setKeycapPressed(event.key, true);
+      // Some browsers go back a page on Backspace, which would close the
+      // dialog and leave the site.
+      if (swallow(event) || event.key === "Backspace") event.preventDefault();
+    };
+    // Buttons act on Space when it is released, so that is held back too.
+    const onKeyUp = (event: KeyboardEvent) => {
+      setKeycapPressed(event.key, false);
+      if (swallow(event)) event.preventDefault();
+    };
+    // A key released while the window is in the background never reports
+    // its keyup, so let every keycap go when focus leaves.
+    const onBlur = () => setPressed(new Set());
+    // Listened for on the way down: the dialog stops the arrow keys before
+    // they would bubble back up to the window.
+    window.addEventListener("keydown", onKeyDown, true);
+    window.addEventListener("keyup", onKeyUp, true);
+    window.addEventListener("blur", onBlur);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown, true);
+      window.removeEventListener("keyup", onKeyUp, true);
+      window.removeEventListener("blur", onBlur);
+    };
+  }, []);
+
+  return (
+    <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+      {SHORTCUTS.map((shortcut) => (
+        <div
+          key={shortcut.action}
+          className="flex items-center justify-between gap-3"
+        >
+          <dt className="text-muted-foreground">{shortcut.action}</dt>
+          <dd className="flex shrink-0 items-center gap-1">
+            {shortcut.keys.map((key) => (
+              <Keycap key={key} pressed={pressed.has(key)}>
+                {key}
+              </Keycap>
+            ))}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
 
 function HelpDialog() {
   return (
@@ -238,21 +347,7 @@ function HelpDialog() {
           <p className="mb-3 text-xs font-medium tracking-wide text-muted-foreground uppercase">
             Keyboard shortcuts
           </p>
-          <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
-            {SHORTCUTS.map((shortcut) => (
-              <div
-                key={shortcut.action}
-                className="flex items-center justify-between gap-3"
-              >
-                <dt className="text-muted-foreground">{shortcut.action}</dt>
-                <dd className="flex shrink-0 items-center gap-1">
-                  {shortcut.keys.map((key) => (
-                    <Kbd key={key}>{key}</Kbd>
-                  ))}
-                </dd>
-              </div>
-            ))}
-          </dl>
+          <ShortcutList />
         </div>
 
         <div className="flex justify-end border-t px-6 py-4">

@@ -116,7 +116,7 @@ export function FeedbackDialog({
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="feedback-message">Message</Label>
+              <Label htmlFor="feedback-message" required>Message</Label>
               <Textarea
                 id="feedback-message"
                 value={message}

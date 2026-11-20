@@ -6,4 +6,5 @@ export const social = {
   },
   x: { link: "https://x.com/heynickn", title: "X (Twitter)" },
   email: { link: "mailto:hi@notnick.io", title: "Email" },
+  paypal: { link: "https://paypal.me/notnickdev", title: "Support on PayPal" },
 } as const;
