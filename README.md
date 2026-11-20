@@ -93,12 +93,6 @@ A few things make this less fiddly than it sounds:
 - Got one wrong? Pause and click its dot to redo from that line.
 - Spotted a typo? Pause, click the line's text and fix it in place.
 
-| Key | Action |
-| --- | --- |
-| `Enter`, `Space`, `↓`, `→` | Next line (or start / continue) |
-| `Backspace`, `↑`, `←` | Undo the last line |
-| `P` | Play / pause |
-
 When every line is stamped, Next Line reads **Done**. Files are named after
 the audio file, and blank lines, which show as spacing while you sync, are
 left out of them.
