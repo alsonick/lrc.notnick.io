@@ -78,7 +78,13 @@ export function Footer() {
 
         <div className="mt-12 border-t pt-6 text-sm text-muted-foreground">
           <p>
-            &copy; {new Date().getFullYear()} {FULL_NAME} · MIT License
+            &copy; {new Date().getFullYear()} {FULL_NAME} ·{" "}
+            <Link
+              href="/license"
+              className="rounded-xs outline-none transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring"
+            >
+              MIT License
+            </Link>
           </p>
         </div>
       </div>
@@ -110,7 +116,7 @@ function FooterColumn({
   );
 }
 
-/** A page of this site, or another site, which opens beside it with an arrow on hover. */
+/** A page of this site, or another site, which opens beside it and has an arrow that nudges outward on hover. */
 function FooterLink({ href, children }: { href: string; children: ReactNode }) {
   return (
     <li>
@@ -128,7 +134,7 @@ function FooterLink({ href, children }: { href: string; children: ReactNode }) {
           {children}
           <ArrowUpRight
             aria-hidden
-            className="ml-1 size-3.5 transform-none opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+            className="ml-1 size-3.5 [transition:translate_500ms_var(--ease-spring)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-focus-visible:translate-x-0.5 group-focus-visible:-translate-y-0.5 motion-reduce:transition-none"
           />
         </a>
       )}
