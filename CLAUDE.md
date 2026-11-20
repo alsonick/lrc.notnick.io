@@ -62,6 +62,7 @@ The last subtitle ends at the song's exact length, which `src/lib/audio.ts` meas
 The server code is small, and every part of it degrades when unconfigured:
 - `src/lib/db.ts` exports `db`, which is `null` without `DATABASE_URL`. Every caller must handle null. `Count` is a single row (`COUNT_ID = 1`), seeded by the first migration. Increment it with the `countRequest(client)` transaction helper.
 - `/api/log` and `/api/count`: the browser calls `reportDownload()` (`src/lib/report-download.ts`) on every saved file. This is fire-and-forget with `keepalive`. When the visitor has turned logging off (`isLoggingEnabled()`), it posts only a bare `/api/count`. Otherwise `/api/log` stores a `Download` row and increments `Count` in one transaction, and posts to the `LOGGING` Discord webhook. The request shape lives in `src/lib/session-log.ts` and is shared by client and server: change `SessionLog`, `validateSessionLog` and `buildSessionLogPayload` together.
+- The Discord bot (LRC-Generator-Bot, its own repo) writes to the same database: a `Download` row with `source: discord` and one more on `Count` for each file it converts. It keeps a copy of `prisma/schema.prisma` but never migrates, so migrations stay here: deploy them before the bot relies on them, and copy schema changes over to it.
 - `/api/feedback` and `/api/reviews` forward to Discord webhooks. Both check `isDiscordWebhookUrl`, reply 204 to honeypot submissions without sending anything, and disable mentions in the payload.
 - `/usage` is a server component that reads the count with `revalidate = 60`.
 

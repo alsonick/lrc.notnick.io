@@ -8,7 +8,7 @@ const title = "Privacy Policy";
 
 const EFFECTIVE_DATE = "8 Oct 2026";
 /** Change this whenever the policy's substance changes. */
-const LAST_UPDATED = "8 Nov 2026";
+const LAST_UPDATED = "20 Nov 2026";
 const CONTACT_EMAIL = "hi@notnick.io";
 
 export const metadata: Metadata = {
@@ -25,8 +25,9 @@ export const metadata: Metadata = {
 /**
  * The privacy policy. It describes what the code does, so it has to change
  * with it: the download log's fields live in `src/lib/session-log.ts`, the
- * feedback form's in `src/lib/feedback.ts` and the review form's in
- * `src/lib/review.ts`.
+ * feedback form's in `src/lib/feedback.ts`, the review form's in
+ * `src/lib/review.ts`, and the Discord bot's in its own repository
+ * (LRC-Generator-Bot, `src/convert/usage-log.ts`).
  */
 export default function Page() {
   return (
@@ -84,6 +85,19 @@ export default function Page() {
             page are made from these statistics. They only show totals: how
             many files were saved each day and hour, of which type, and how the
             lyrics got there. No file name, or anything about you, is shown.
+          </p>
+        </Section>
+
+        <Section title="Discord Bot">
+          <p>
+            Our Discord bot turns .lrc files into .srt subtitles. Each time it
+            converts a file, it notes that an .srt was made and when, which
+            adds one to the{" "}
+            <Link href="/usage" className={LINK_CLASS}>
+              Usage
+            </Link>{" "}
+            page’s count and charts. Your lyrics, the file’s name and your
+            Discord account are never stored.
           </p>
         </Section>
 

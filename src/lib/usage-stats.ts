@@ -4,8 +4,9 @@
  * the server and doesn't know the visitor's time zone.
  */
 
+import type { DownloadSource } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
-import type { DownloadFormat, DownloadSource } from "@/lib/session-log";
+import type { DownloadFormat } from "@/lib/session-log";
 
 /** How many days the downloads chart can show, today included. */
 export const DAYS_SHOWN = 90;
@@ -26,6 +27,7 @@ export type UsageStats = {
   /** Downloads in each hour of the day (UTC), from midnight. Always 24 long. */
   hours: number[];
   formats: Record<DownloadFormat, number>;
+  /** The site's sources, plus files converted by the Discord bot. */
   sources: Record<DownloadSource, number>;
   /** The day with the most downloads ever, or null when there are none. */
   busiestDay: DailyCount | null;
@@ -97,6 +99,7 @@ export async function getUsageStats(): Promise<UsageStats | null> {
       sync: 0,
       editor: 0,
       upload: 0,
+      discord: 0,
     };
     let total = 0;
     for (const group of groups) {

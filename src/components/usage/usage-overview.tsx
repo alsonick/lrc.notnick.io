@@ -96,6 +96,7 @@ export function UsageOverview({
               { label: "Synced in the app", value: stats.sources.sync },
               { label: "Saved from the editor", value: stats.sources.editor },
               { label: "Uploaded an .lrc", value: stats.sources.upload },
+              { label: "Converted on Discord", value: stats.sources.discord },
             ]}
           />
         </div>
