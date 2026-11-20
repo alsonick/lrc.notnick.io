@@ -116,23 +116,18 @@ to on the right. Both are plain editable text.
   </picture>
 </p>
 
-Lines with no timestamp, and timestamps that run backwards, are marked. The
-footer says what is wrong with the one under your caret and walks you through
-the rest. Put the caret on a line and its counterpart on the other side lights
-up.
+- **Problems are marked.** Lines with no timestamp, and timestamps that run
+  backwards, are flagged, and the footer explains each one.
+- **Lines are linked.** Put the caret on a line and its match on the other
+  side lights up.
+- **Subtitles can go their own way.** They follow the `.lrc` until you edit
+  them by hand. Then you can split, retime or **Add** subtitles freely.
+- **Revert** undoes your `.lrc` edits, or rebuilds the subtitles from it.
+- **Max length** wraps long subtitle lines onto a new row, keeping their times.
+  Clear the box to turn it off.
 
-The subtitles follow the `.lrc` until you edit them by hand. After that they
-are their own text: split one over two rows, change its times, or **Add** a
-new one after the caret. **Revert** undoes your edits to the `.lrc`, and on
-the subtitle side it rebuilds them from the `.lrc`. Hand edits to the
-subtitles only exist in the panel, so closing it before you have downloaded
-them asks first.
-
-**Max length** caps how many characters a subtitle line can have. Longer lines
-wrap onto the next row inside the same subtitle, so their times stay put. They
-break at a space where they can, and a word is only cut if it is too long for a
-row by itself. The subtitles keep following the `.lrc` while they are wrapped,
-and **Revert** or clearing the box takes the limit off.
+Hand edits to the subtitles only live in the panel, so closing it before you
+download them asks first.
 
 ### How an .lrc becomes an .srt
 
@@ -196,9 +191,9 @@ database (through Prisma) that counts the files saved.
 | `src/lib/audio.ts` | Measuring an audio file's real length by decoding it |
 | `src/lib/lrc.ts` | Parsing lyrics, cleaning them up and writing the LRC |
 | `src/lib/srt.ts` | Turning LRC into SRT and reading hand-edited subtitles |
-| `src/app/api/` | The routes that pass feedback, reviews and logs to Discord, and count saves |
-| `prisma/` | The database schema and its migrations |
 | `src/lib/db.ts` | The Prisma client, null when there's no database |
+| `src/app/api/` | Routes that send feedback, reviews and logs to Discord |
+| `prisma/` | The database schema and its migrations |
 
 ## Run it locally
 
@@ -214,32 +209,12 @@ pnpm dev
 Then open http://localhost:3000. `pnpm build` and `pnpm start` serve the
 production build, and `pnpm lint` runs ESLint.
 
-The app works without any configuration. A Postgres database and a few
-optional Discord webhooks switch on the parts that talk to a server. Copy
-`.env.example` to `.env.local` and set whichever you want:
-
-| Variable | What it does | Without it |
-| --- | --- | --- |
-| `DATABASE_URL` | Counts the files saved for /usage, and stores each one when logging is on | Nothing is stored, and /usage shows a dash |
-| `DISCORD_WEBHOOK_URL` | Receives messages from the Feedback form | The form says feedback isn't set up |
-| `LOGGING` | Receives the usage record | Nothing is logged to Discord |
-| `REVIEWS_WEBHOOK_URL` | Receives reviews from /usage | Reviews go to `DISCORD_WEBHOOK_URL` |
-
-Make a webhook in Discord under Server Settings > Integrations > Webhooks.
-Use a different channel for each.
-
 The database is set up with [Prisma](https://www.prisma.io). Once
 `DATABASE_URL` is set, create its tables with:
 
 ```bash
 pnpm prisma migrate deploy
 ```
-
-## Feedback
-
-Bugs and ideas are welcome. [Open an issue](https://github.com/alsonick/lrc.notnick.io/issues/new),
-or use the Feedback button in the app, which comes straight to me.
-
 
 ## License
 
