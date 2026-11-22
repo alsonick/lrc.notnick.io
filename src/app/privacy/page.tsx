@@ -8,7 +8,7 @@ const title = "Privacy Policy";
 
 const EFFECTIVE_DATE = "8 Oct 2026";
 /** Change this whenever the policy's substance changes. */
-const LAST_UPDATED = "20 Nov 2026";
+const LAST_UPDATED = "22 Nov 2026";
 const CONTACT_EMAIL = "hi@notnick.io";
 
 export const metadata: Metadata = {
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
  * with it: the download log's fields live in `src/lib/session-log.ts`, the
  * feedback form's in `src/lib/feedback.ts`, the review form's in
  * `src/lib/review.ts`, and the Discord bot's in its own repository
- * (LRC-Generator-Bot, `src/convert/usage-log.ts`).
+ * (LRC-Generator-Bot, `src/convert/discord-log.ts` and `usage-log.ts`).
  */
 export default function Page() {
   return (
@@ -96,9 +96,22 @@ export default function Page() {
             <Link href="/usage" className={LINK_CLASS}>
               Usage
             </Link>{" "}
-            page’s count and charts. Your lyrics, the file’s name and your
-            Discord account are never stored.
+            page’s count and charts.
           </p>
+          <p>
+            It also sends a note about the conversion to a private Discord
+            channel that only we can read:
+          </p>
+          <ul className="list-disc space-y-1 pl-5">
+            <li>The file’s name and how many lines it has</li>
+            <li>The language your Discord is set to</li>
+            <li>How the file reached the bot</li>
+            <li>
+              Where it was used: a server or a DM, whether the bot was added
+              to the server or to your account, and the server’s language
+            </li>
+          </ul>
+          <p>Your lyrics and your Discord account are never stored or sent.</p>
         </Section>
 
         <Section title="Feedback and Reviews">
